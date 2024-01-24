@@ -1,0 +1,16 @@
+
+st.title() : affiche un titre
+st.header() : affiche un deuxième titre
+st.subheader() : affiche un troisième titre
+st.markdown() : affiche du texte au format markdown
+st.code() : affiche du code
+st.image() : affiche une image (cette fonction prend en argument un np.array à 3 dimensions)
+st.write() : affiche du texte ou du code (équivalent à print sur un notebook)
+st.dataframe() : affiche un dataframe
+Remarque : Il faut encadrer le code classique concernant un dataframe avec cette commande. Par exemple, si le code de base est df.head(), nous écrivons st.dataframe(df.head()) pour obtenir l'affichage sur Streamlit.*
+st.button : crée un bouton
+st.checkbox() : crée un bouton à cocher pour obtenir l'affichage
+st.selectbox() : crée une boite avec différentes options pour obtenir l'affichage sélectionné
+st.slider() : crée un curseur de défilement permettant de sélectionner une valeur numérique parmi une plage donnée
+st.select_slider() : crée un curseur de défilement permettant de sélectionner une valeur non-numérique parmi une plage donnée
+Toutes les fonctions existantes sont répertoriées dans la CheatSheet suivante et dans la documentation officielle Streamlit.
