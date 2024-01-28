@@ -18,7 +18,7 @@ df=pd.read_csv("train.csv")
 df.head()
 
 ## ajout de titre et de trois pages
-st.title("Projet de classification binaire Titanic")
+st.title("Projet de classification binaire Titanic (spyder)")
 st.sidebar.title("Sommaire")
 pages=["Introduction", "Préparation des données", "DataVizualization", "Modélisation"]
 page=st.sidebar.radio("Aller vers", pages)
