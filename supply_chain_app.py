@@ -23,7 +23,9 @@ import re
 from bs4 import BeautifulSoup as bs
 import requests
 
-df=pd.read_csv("train.csv")
+df = pd.read_csv("train.csv")
+df_liste_liens = pd.read_excel("liste_finale_à_scraper.xlsx", index_col=0)
+# df_clean = pd.read_excel("Final_data_scraped_traité_traduit_ok_clean.xlsx", index_col=0)
 # df.head()
 
 ## ajout de titre et de trois pages
@@ -57,110 +59,116 @@ if page == pages[0] :
 ## page préparation des données
 if page == pages[1] : 
   st.write("### Webscraping")
-  # afficher les premières ligne de DF
-  # st.dataframe(df.head(10))
+  st.write("#### Préparation de la liste des liens à scraper")
+  # afficher les premières ligne de DF_liste_liens
+  st.dataframe(df_liste_liens.head(10))
 
-  # st.write(df.shape)
-  # st.dataframe(df.describe())
+  st.write(df_liste_liens.shape)
+  st.dataframe(df_liste_liens.describe())
 
-  # if st.checkbox("Afficher les NA") :
-  #   st.dataframe(df.isna().sum())
+  if st.checkbox("Afficher les NA") :
+    st.dataframe(df_liste_liens.isna().sum())
 
-  #################################""""
-  categorie, pays ,marque, liens_marque, reviews = [],[],[],[],[]
-  # #'https://www.trustpilot.com/categories/furniture_store?country=FR'
-
-  ## mettre ici la liste des catégories à parcourir: alimenter cette liste par:
-  ## furniture_stor , bank, travel_insurance_company , car_dealer, jewelry_store,
-
-  liste_liens1 = ['bank']
-
-  ## modifier la liste pour importer les bonnes données, 1,2,3 ou 4 ...
-  for lien_c in liste_liens1:
-
-    lien = 'https://www.trustpilot.com/categories/'+str(lien_c)+'?country=FR'
-    # récupératu du code html de toute la page et le stocker dans une variable: soup
-    page = requests.get(lien)
-    soup = bs(page.content, "lxml")
-
-    # # Sélectionner la partie de la page qui contient les numéros de page
-    # pagination_div = soup.find('nav', class_='pagination_pagination___F1qS')
-
-    # # Extraire les numéros de page en parcourant les éléments de la pagination
-    # try:
-    #   page_numbers = []
-    #   for item in pagination_div.find_all(['span']):
-    #       page_numbers.append(item.get_text())
-    # except:
-    #       page_numbers.append(1)
-    # # print(page_numbers)
-    # nb_pages = int(page_numbers[-2])
-    # print(lien_c,'contient :',nb_pages, 'pages!')
-
-    ### début de la boucle qui parcours les pages d'une marque X
-    for X in range(1,2+1):
-
-        sleep(0) # attendre une demi seconde entre chaque page, pas obligé
-        lien2 = 'https://www.trustpilot.com/categories/'+str(lien_c)+'?country=FR&page='+str(X)
-
-        # récupératu du code html de toute la page et le stocker dans une variable: soup
-        page = requests.get(lien2)
-        soup2 = bs(page.content, "lxml")
-        soup_marques = soup2.find_all('div', class_ = ("paper_paper__1PY90 paper_outline__lwsUX card_card__lQWDv card_noPadding__D8PcU styles_wrapper__2JOo2"))
-        # print(soup_marques)
-        # company = soup.find('h1',class_='typography_default__hIMlQ typography_appearance-default__AAY17 title_title__i9V__').text.strip() ## récupérer le nom de la marque
-
-        ## parcourir le code html (soup) pour extraire les informations des balises
-        for lien_m in soup_marques:
-          # lienss =
-          marque.append(lien_m.find('p',class_ ='typography_heading-xs__jSwUz typography_appearance-default__AAY17 styles_displayName__GOhL2').text)
-          liens_marque.append(lien_m.find('a',class_ ='link_internal__7XN06 link_wrapper__5ZJEx styles_linkWrapper__UWs5j').get('href'))
-          reviews.append(lien_m.find('p',class_ ='typography_body-m__xgxZ_ typography_appearance-subtle__8_H2l styles_ratingText__yQ5S7'))
-          # reviews.append(lien_m.find('div',class_ ='styles_rating__pY5Pk'))
-          categorie.append(lien_c)
-          pays.append("FR")
+  
+  # afficher les premières ligne de DF clean
+  # st.dataframe(df_clean.head(10))
 
 
-  data = {
-        'marque': marque,
-        'liens_marque': liens_marque,
-        'categorie': categorie,
-        'reviews': reviews,
-        'pays': pays
-        }
+###################### debut webscraping###########""""
+  # categorie, pays ,marque, liens_marque, reviews = [],[],[],[],[]
+  # # #'https://www.trustpilot.com/categories/furniture_store?country=FR'
 
-  # création de Dataframe pour y stocker les données
-  df_liens = pd.DataFrame(data)
+  # ## mettre ici la liste des catégories à parcourir: alimenter cette liste par:
+  # ## furniture_stor , bank, travel_insurance_company , car_dealer, jewelry_store,
 
-  ###############  data cleaning: ############################
-  df_liens['liens_marque'] = df_liens['liens_marque'].str.replace('/review/','')
+  # liste_liens1 = ['bank']
 
-  ## extraire le nombre de reviews en utilisant une fonction
-  def extraire_chiffres(texte):
-      pattern = r'\|\</span>([0-9,]+)'
-      match = re.search(pattern, str(texte))
-      if match:
-          chiffres_apres_barre_span = match.group(1)
-          return chiffres_apres_barre_span
-      elif len(str(texte)) < 8:
-          return texte
-      else:
-          return None
-  ## appliquer la fonction à la colonne reviews
-  df_liens['reviews'] = df_liens['reviews'].apply(extraire_chiffres)
-  ## convertir reviews en nombre
-  df_liens['reviews'] = df_liens['reviews'].str.replace(',','')
-  # df_liens['reviews'] = df_liens['reviews'].str.replace('None',0)
-  df_liens['reviews']=df_liens['reviews'].astype(float)
-  ## trier le dataframe
-  df_liens = df_liens.sort_values(by=['categorie', 'reviews'], ascending=[True, False])
+  # ## modifier la liste pour importer les bonnes données, 1,2,3 ou 4 ...
+  # for lien_c in liste_liens1:
 
-  ## enregistrer le dataframe traité en csv et excel: ne pas oublier de modififier _liste_liens4 pour ne pas ecraser l'ancien enregistrement
-  # df_liens.to_csv('Avis_trustpilot_liste_liens4.csv')
-  # df_liens.to_excel('Avis_trustpilot_liste_liens4.xlsx')
+  #   lien = 'https://www.trustpilot.com/categories/'+str(lien_c)+'?country=FR'
+  #   # récupératu du code html de toute la page et le stocker dans une variable: soup
+  #   page = requests.get(lien)
+  #   soup = bs(page.content, "lxml")
 
-  st.dataframe(df_liens.head(10))
+  #   # # Sélectionner la partie de la page qui contient les numéros de page
+  #   # pagination_div = soup.find('nav', class_='pagination_pagination___F1qS')
 
+  #   # # Extraire les numéros de page en parcourant les éléments de la pagination
+  #   # try:
+  #   #   page_numbers = []
+  #   #   for item in pagination_div.find_all(['span']):
+  #   #       page_numbers.append(item.get_text())
+  #   # except:
+  #   #       page_numbers.append(1)
+  #   # # print(page_numbers)
+  #   # nb_pages = int(page_numbers[-2])
+  #   # print(lien_c,'contient :',nb_pages, 'pages!')
+
+  #   ### début de la boucle qui parcours les pages d'une marque X
+  #   for X in range(1,2+1):
+
+  #       sleep(0) # attendre une demi seconde entre chaque page, pas obligé
+  #       lien2 = 'https://www.trustpilot.com/categories/'+str(lien_c)+'?country=FR&page='+str(X)
+
+  #       # récupératu du code html de toute la page et le stocker dans une variable: soup
+  #       page = requests.get(lien2)
+  #       soup2 = bs(page.content, "lxml")
+  #       soup_marques = soup2.find_all('div', class_ = ("paper_paper__1PY90 paper_outline__lwsUX card_card__lQWDv card_noPadding__D8PcU styles_wrapper__2JOo2"))
+  #       # print(soup_marques)
+  #       # company = soup.find('h1',class_='typography_default__hIMlQ typography_appearance-default__AAY17 title_title__i9V__').text.strip() ## récupérer le nom de la marque
+
+  #       ## parcourir le code html (soup) pour extraire les informations des balises
+  #       for lien_m in soup_marques:
+  #         # lienss =
+  #         marque.append(lien_m.find('p',class_ ='typography_heading-xs__jSwUz typography_appearance-default__AAY17 styles_displayName__GOhL2').text)
+  #         liens_marque.append(lien_m.find('a',class_ ='link_internal__7XN06 link_wrapper__5ZJEx styles_linkWrapper__UWs5j').get('href'))
+  #         reviews.append(lien_m.find('p',class_ ='typography_body-m__xgxZ_ typography_appearance-subtle__8_H2l styles_ratingText__yQ5S7'))
+  #         # reviews.append(lien_m.find('div',class_ ='styles_rating__pY5Pk'))
+  #         categorie.append(lien_c)
+  #         pays.append("FR")
+
+
+  # data = {
+  #       'marque': marque,
+  #       'liens_marque': liens_marque,
+  #       'categorie': categorie,
+  #       'reviews': reviews,
+  #       'pays': pays
+  #       }
+
+  # # création de Dataframe pour y stocker les données
+  # df_liens = pd.DataFrame(data)
+
+  # ###############  data cleaning: ############################
+  # df_liens['liens_marque'] = df_liens['liens_marque'].str.replace('/review/','')
+
+  # ## extraire le nombre de reviews en utilisant une fonction
+  # def extraire_chiffres(texte):
+  #     pattern = r'\|\</span>([0-9,]+)'
+  #     match = re.search(pattern, str(texte))
+  #     if match:
+  #         chiffres_apres_barre_span = match.group(1)
+  #         return chiffres_apres_barre_span
+  #     elif len(str(texte)) < 8:
+  #         return texte
+  #     else:
+  #         return None
+  # ## appliquer la fonction à la colonne reviews
+  # df_liens['reviews'] = df_liens['reviews'].apply(extraire_chiffres)
+  # ## convertir reviews en nombre
+  # df_liens['reviews'] = df_liens['reviews'].str.replace(',','')
+  # # df_liens['reviews'] = df_liens['reviews'].str.replace('None',0)
+  # df_liens['reviews']=df_liens['reviews'].astype(float)
+  # ## trier le dataframe
+  # df_liens = df_liens.sort_values(by=['categorie', 'reviews'], ascending=[True, False])
+
+  # ## enregistrer le dataframe traité en csv et excel: ne pas oublier de modififier _liste_liens4 pour ne pas ecraser l'ancien enregistrement
+  # # df_liens.to_csv('Avis_trustpilot_liste_liens4.csv')
+  # # df_liens.to_excel('Avis_trustpilot_liste_liens4.xlsx')
+
+  # st.dataframe(df_liens.head(10))
+  ############### fin webscraping #################################################
 
 ## page de la dataviz
 if page == pages[2] : 
@@ -168,13 +176,13 @@ if page == pages[2] :
   fig = plt.figure()
   sns.countplot(x = 'Survived', data = df)
   st.pyplot(fig)
-  fig = plt.figure()
 
+  fig = plt.figure()
   sns.countplot(x = 'Sex', data = df)
   plt.title("Répartition du genre des passagers")
   st.pyplot(fig)
-  fig = plt.figure()
 
+  fig = plt.figure()
   sns.countplot(x = 'Pclass', data = df)
   plt.title("Répartition des classes des passagers")
   st.pyplot(fig)
