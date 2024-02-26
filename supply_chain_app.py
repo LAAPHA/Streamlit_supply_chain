@@ -4,14 +4,15 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-
-# from sklearn.naive_bayes import MultinomialNB
-from sklearn.svm import SVC
-from sklearn.linear_model import LogisticRegression
-# from sklearn.neighbors import KNeighborsClassifier
-from sklearn.ensemble import RandomForestClassifier
+# import des modèles
 from sklearn.metrics import roc_auc_score, accuracy_score, confusion_matrix
 from sklearn.metrics import classification_report
+from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.svm import SVC
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
 
 # import warnings
 # warnings.filterwarnings("ignore")
@@ -27,6 +28,9 @@ df = pd.read_csv("train.csv")
 df_liste_liens = pd.read_excel("liste_finale_à_scraper.xlsx", index_col=0)
 # df_clean = pd.read_excel("Final_data_scraped_traité_traduit_ok_clean.xlsx", index_col=0)
 # df.head()
+
+import joblib
+df_clean_2 = joblib.load("data_clean_lib")
 
 ## ajout de titre et de trois pages
 st.title("Projet Supply Chain - Satisfaction des clients")
@@ -172,41 +176,53 @@ if page == pages[1] :
 
 ## page de la dataviz
 if page == pages[2] : 
+  # import joblib
+  # df_clean_2 = joblib.load("data_clean_")
+
   st.write("### DataVizualization")
+  # afficher les premières ligne de DF clean
+  st.dataframe(df_clean_2.head(10))
+
+  # colonnes_à_supprimer = ['categorie_bis','verified', 'nombre_caractères', 'nombre_caractères', 'nombre_maj', 'nombre_car_spé', 'emojis_positifs_count',
+  #      'emojis_negatifs_count',  'nombre_point_intero', 'nombre_point_exclam', 'companies', 'noms', 'titre_com', 'commentaire', 'verif_reponses',
+  #      'reponses',  'date_experience', 'date_commentaire', 'site', 'nombre_pages', 'date_scrap',  'année_experience', 'langue',
+  #      'mois_experience', 'jour_experience', 'année_commentaire','mois_commentaire', 'jour_commentaire', 'leadtime_com_exp','caractères_spé',
+  #      'commentaire_text','commentaire_en', 'verif_traduction', 'commentaire_en_bis','cat_nombre_caractères','cat_nombre_maj','notes','sentiment_commentaire','commentaire_clean']
+  # ## supprimer les colonnes inutiles
+  # df2 = st.dataframe(df_clean_2)
+  # st.dataframe(df2.head(5))
+
+  # fig = plt.figure()
+  # sns.countplot(x = 'categorie_bis', data = df_clean_2)
+  # st.pyplot(fig)
+
   fig = plt.figure()
-  sns.countplot(x = 'Survived', data = df)
+  sns.countplot(x = 'notes_bis', data = df_clean_2)
+  plt.title("Répartition des notes_bis")
   st.pyplot(fig)
 
   fig = plt.figure()
-  sns.countplot(x = 'Sex', data = df)
-  plt.title("Répartition du genre des passagers")
+  sns.countplot(x = 'langue', data = df_clean_2)
+  plt.title("Répartition des commentaires par langue")
   st.pyplot(fig)
 
-  fig = plt.figure()
-  sns.countplot(x = 'Pclass', data = df)
-  plt.title("Répartition des classes des passagers")
-  st.pyplot(fig)
-
-  fig = sns.displot(x = 'Age', data = df)
-  plt.title("Distribution de l'âge des passagers")
-  st.pyplot(fig)
-  
+    
 # Afficher un countplot de la variable cible en fonction du genre.
-  fig = plt.figure()
-  sns.countplot(x = 'Survived', hue='Sex', data = df)
-  st.pyplot(fig)
+  # fig = plt.figure()
+  # sns.countplot(x = 'Survived', hue='Sex', data = df_clean_2)
+  # st.pyplot(fig)
 
-# Afficher un plot de la variable cible en fonction des classes.
-  fig = sns.catplot(x='Pclass', y='Survived', data=df, kind='point')
-  st.pyplot(fig)
+# # Afficher un plot de la variable cible en fonction des classes.
+#   fig = sns.catplot(x='Pclass', y='notes_bis', data=df_clean_2, kind='point')
+#   st.pyplot(fig)
 
-# Afficher un plot de la variable cible en fonction des âges.
-  fig = sns.lmplot(x='Age', y='Survived', hue="Pclass", data=df)
-  st.pyplot(fig)
+# # Afficher un plot de la variable cible en fonction des âges.
+#   fig = sns.lmplot(x='Age', y='Survived', hue="Pclass", data=df_clean_2)
+#   st.pyplot(fig)
 
 # matrice de correlation
   fig, ax = plt.subplots()
-  sns.heatmap(df.corr(), ax=ax)
+  sns.heatmap(df_clean_2.corr(), ax=ax)
   st.write(fig)
 
 ## '''''''''''''''la page de modélisation '''''''''''''''''''''''''''''''''''
@@ -214,22 +230,66 @@ if page == pages[3] :
   st.write("### Modélisation / modèles")
 
   import joblib
-  # (b) Dans le script Python streamlit_app.py, supprimer les variables non-pertinentes (PassengerID, Name, Ticket, Cabin).
-  df = df.drop(['PassengerId', 'Name', 'Ticket', 'Cabin'], axis=1)
-  # (c) Dans le script Python, créer une variable y contenant la variable target. Créer un dataframe X_cat contenant les variables explicatives catégorielles et un dataframe X_num contenant les variables explicatives numériques.
-  y = df['Survived']
-  X_cat = df[['Pclass', 'Sex',  'Embarked']]
-  X_num = df[['Age', 'Fare', 'SibSp', 'Parch']]
+  # # (b) Dans le script Python streamlit_app.py, supprimer les variables non-pertinentes (PassengerID, Name, Ticket, Cabin).
+  # df = df.drop(['PassengerId', 'Name', 'Ticket', 'Cabin'], axis=1)
+  # # (c) Dans le script Python, créer une variable y contenant la variable target. Créer un dataframe X_cat contenant les variables explicatives catégorielles et un dataframe X_num contenant les variables explicatives numériques.
+  # y = df['Survived']
+  # X_cat = df[['Pclass', 'Sex',  'Embarked']]
+  # X_num = df[['Age', 'Fare', 'SibSp', 'Parch']]
   
-  for col in X_cat.columns:
-    X_cat[col] = X_cat[col].fillna(X_cat[col].mode()[0])
-  for col in X_num.columns:
-    X_num[col] = X_num[col].fillna(X_num[col].median())
-  X_cat_scaled = pd.get_dummies(X_cat, columns=X_cat.columns)
-  X = pd.concat([X_cat_scaled, X_num], axis = 1)
-  # (g) Dans le script Python, séparer les données en un ensemble d'entrainement et un ensemble test en utilisant la fonction train_test_split du package model_selection de Scikit-Learn.
+  # for col in X_cat.columns:
+  #   X_cat[col] = X_cat[col].fillna(X_cat[col].mode()[0])
+  # for col in X_num.columns:
+  #   X_num[col] = X_num[col].fillna(X_num[col].median())
+  # X_cat_scaled = pd.get_dummies(X_cat, columns=X_cat.columns)
+  # X = pd.concat([X_cat_scaled, X_num], axis = 1)
+  # # (g) Dans le script Python, séparer les données en un ensemble d'entrainement et un ensemble test en utilisant la fonction train_test_split du package model_selection de Scikit-Learn.
+  # from sklearn.model_selection import train_test_split
+  # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=123)
+
+  #################""
+  ## Colonnes à supprimer
+  st.dataframe(df_clean_2.head(10))
+
+  # colonnes_à_supprimer = ['categorie_bis','verified', 'nombre_caractères', 'nombre_caractères', 'nombre_maj', 'nombre_car_spé', 'emojis_positifs_count',
+  #      'emojis_negatifs_count',  'nombre_point_intero', 'nombre_point_exclam', 'companies', 'noms', 'titre_com', 'commentaire', 'verif_reponses',
+  #      'reponses',  'date_experience', 'date_commentaire', 'site', 'nombre_pages', 'date_scrap',  'année_experience', 'langue',
+  #      'mois_experience', 'jour_experience', 'année_commentaire','mois_commentaire', 'jour_commentaire', 'leadtime_com_exp','caractères_spé',
+  #      'commentaire_text','commentaire_en', 'verif_traduction', 'commentaire_en_bis','cat_nombre_caractères','cat_nombre_maj','notes','sentiment_commentaire','commentaire_clean']
+  # ## supprimer les colonnes inutiles
+  # df2 = df_clean_2.drop(columns=colonnes_à_supprimer)
+  # df2.info()
+  #Supprime les doublons
+
+  df2 = df_clean_2[['commentaire_clean_pos_tag','notes_bis']]
+  df2 = df2.reset_index(drop=True)
+  df2 = df2.drop_duplicates()
+  df2 = df2.dropna(subset=['commentaire_clean_pos_tag'])
+  st.dataframe(df2.head(10))
+  
+  from sklearn.preprocessing import LabelEncoder
+  from sklearn.feature_extraction.text import TfidfVectorizer
+
+  # on commence par transformer notre variable à prédire en variable binaire
+  encode_y = LabelEncoder()
+
+  # x = df2["commentaire_clean"]
+  x = df2["commentaire_clean_pos_tag"] ## ajouter POS Tagging
+  y = encode_y.fit_transform(df2["notes_bis"])
+
+  # on sépare en apprentissage/validation
   from sklearn.model_selection import train_test_split
-  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=123)
+  # y = df["notes_bis"]
+
+  x_train, x_test, y_train, y_test = train_test_split(x , y ,test_size = 0.2)
+
+  # on transforme en matrice creuse d’occurrence des mots (on transforme x_train et on applique à x_test la transformation)
+  # trans_vect = CountVectorizer()
+  trans_vect = TfidfVectorizer()
+
+  x_train_trans = trans_vect.fit_transform(x_train)
+  x_test_trans  = trans_vect.transform(x_test)
+
 
   ######################
 
@@ -237,14 +297,20 @@ if page == pages[3] :
 
   def prediction(classifier):
       if classifier == 'Random Forest':
-          clf = joblib.load("model_rf_")
+          clf = joblib.load("modele_svm_lib")
           
       elif classifier == 'SVC':
-          clf = joblib.load("model_svc_")
+          clf = joblib.load("modele_svm_lib")
           
-      elif classifier == 'Logistic Regression':
-          clf = joblib.load("model_lr_")
-          
+      elif classifier == 'KNN':
+          clf = joblib.load("modele_knn_lib")
+
+      elif classifier == 'Naive Bayes':
+          clf = joblib.load("modele_bayes_lib")
+
+      elif classifier == 'Gardient boosting':
+          clf = joblib.load("modele_gb_lib")
+
       # clf.fit(X_train, y_train)
 
       return clf
@@ -253,12 +319,15 @@ if page == pages[3] :
 
   def scores(clf, choice):
       if choice == 'Accuracy':
-          return clf.score(X_test, y_test)
+          return clf.score(x_test_trans, y_test)
       elif choice == 'Confusion matrix':
-          return confusion_matrix(y_test, clf.predict(X_test))
-      
+          return confusion_matrix(y_test, clf.predict(x_test_trans))
+
+  # y_pred_knn = modele_knn.predict(x_test_trans)# Calculate predictions
+  # print("Accuracy pour KNN :", accuracy_score(y_test, y_pred_knn))
+
   # (j) Dans le script Python, utiliser la méthode st.selectbox() pour choisir entre le classifieur RandomForest, le classifieur SVM et le classifieur LogisticRegression. Puis retourner sur l'application web Streamlit pour visualiser la "select box".
-  choix = ['Random Forest', 'SVC', 'Logistic Regression']
+  choix = ['Random Forest', 'SVC', 'KNN','Naive Bayes','Gardient boosting']
   option = st.selectbox('Choix du modèle', choix)
   st.write('Le modèle choisi est :', option)
   
@@ -268,9 +337,12 @@ if page == pages[3] :
   display = st.radio('Que souhaitez-vous montrer ?', ('Accuracy', 'Confusion matrix','Rapport'))
 
   if display == 'Accuracy':
+      clf
       st.write(scores(clf, display))
+
   elif display == 'Confusion matrix':
       st.dataframe(scores(clf, display))
+
   elif display == 'Rapport':
       st.write('Le Rapport est en cours de construction...')
 
