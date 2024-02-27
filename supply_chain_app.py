@@ -14,6 +14,13 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 
+from sklearn.decomposition import PCA
+
+from sklearn.preprocessing import LabelEncoder
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+# on commence par transformer notre variable à prédire en variable binaire
+encode_y = LabelEncoder()
 # import warnings
 # warnings.filterwarnings("ignore")
 from time import sleep
@@ -24,13 +31,25 @@ import re
 from bs4 import BeautifulSoup as bs
 import requests
 
-df = pd.read_csv("train.csv")
 df_liste_liens = pd.read_excel("liste_finale_à_scraper.xlsx", index_col=0)
 # df_clean = pd.read_excel("Final_data_scraped_traité_traduit_ok_clean.xlsx", index_col=0)
 # df.head()
 
 import joblib
 df_clean_2 = joblib.load("data_clean_lib")
+df_clean_2 = df_clean_2.reset_index(drop = False)
+
+colonnes_à_supprimer = ['categorie_bis','verified', 'nombre_caractères', 'nombre_caractères', 'nombre_maj', 'nombre_car_spé', 'emojis_positifs_count',
+       'emojis_negatifs_count',  'nombre_point_intero', 'nombre_point_exclam', 'companies', 'noms', 'titre_com', 'commentaire', 'verif_reponses',
+       'reponses',  'date_experience', 'date_commentaire', 'site', 'nombre_pages', 'date_scrap',  'année_experience', 'langue',
+       'mois_experience', 'jour_experience', 'année_commentaire','mois_commentaire', 'jour_commentaire', 'leadtime_com_exp','caractères_spé',
+       'commentaire_text','commentaire_en', 'verif_traduction', 'commentaire_en_bis','cat_nombre_caractères','cat_nombre_maj','notes','sentiment_commentaire','commentaire_clean']
+
+## supprimer les colonnes inutiles
+df2 = df_clean_2.drop(columns=colonnes_à_supprimer)
+df2 = df2.drop_duplicates()
+df2 = df2.dropna(subset=['commentaire_clean_pos_tag'])
+
 
 ## ajout de titre et de trois pages
 st.title("Projet Supply Chain - Satisfaction des clients")
@@ -192,9 +211,9 @@ if page == pages[2] :
   # df2 = st.dataframe(df_clean_2)
   # st.dataframe(df2.head(5))
 
-  # fig = plt.figure()
-  # sns.countplot(x = 'categorie_bis', data = df_clean_2)
-  # st.pyplot(fig)
+  fig = plt.figure()
+  sns.countplot(x = 'categorie_bis', data = df_clean_2)
+  st.pyplot(fig)
 
   fig = plt.figure()
   sns.countplot(x = 'notes_bis', data = df_clean_2)
@@ -206,11 +225,6 @@ if page == pages[2] :
   plt.title("Répartition des commentaires par langue")
   st.pyplot(fig)
 
-    
-# Afficher un countplot de la variable cible en fonction du genre.
-  # fig = plt.figure()
-  # sns.countplot(x = 'Survived', hue='Sex', data = df_clean_2)
-  # st.pyplot(fig)
 
 # # Afficher un plot de la variable cible en fonction des classes.
 #   fig = sns.catplot(x='Pclass', y='notes_bis', data=df_clean_2, kind='point')
@@ -251,27 +265,10 @@ if page == pages[3] :
   ## Colonnes à supprimer
   st.dataframe(df_clean_2.head(10))
 
-  # colonnes_à_supprimer = ['categorie_bis','verified', 'nombre_caractères', 'nombre_caractères', 'nombre_maj', 'nombre_car_spé', 'emojis_positifs_count',
-  #      'emojis_negatifs_count',  'nombre_point_intero', 'nombre_point_exclam', 'companies', 'noms', 'titre_com', 'commentaire', 'verif_reponses',
-  #      'reponses',  'date_experience', 'date_commentaire', 'site', 'nombre_pages', 'date_scrap',  'année_experience', 'langue',
-  #      'mois_experience', 'jour_experience', 'année_commentaire','mois_commentaire', 'jour_commentaire', 'leadtime_com_exp','caractères_spé',
-  #      'commentaire_text','commentaire_en', 'verif_traduction', 'commentaire_en_bis','cat_nombre_caractères','cat_nombre_maj','notes','sentiment_commentaire','commentaire_clean']
-  # ## supprimer les colonnes inutiles
-  # df2 = df_clean_2.drop(columns=colonnes_à_supprimer)
-  # df2.info()
-  #Supprime les doublons
-
-  df2 = df_clean_2[['commentaire_clean_pos_tag','notes_bis']]
-  df2 = df2.reset_index(drop=True)
-  df2 = df2.drop_duplicates()
-  df2 = df2.dropna(subset=['commentaire_clean_pos_tag'])
+  
   st.dataframe(df2.head(10))
   
-  from sklearn.preprocessing import LabelEncoder
-  from sklearn.feature_extraction.text import TfidfVectorizer
-
-  # on commence par transformer notre variable à prédire en variable binaire
-  encode_y = LabelEncoder()
+ 
 
   # x = df2["commentaire_clean"]
   x = df2["commentaire_clean_pos_tag"] ## ajouter POS Tagging
@@ -281,27 +278,31 @@ if page == pages[3] :
   from sklearn.model_selection import train_test_split
   # y = df["notes_bis"]
 
-  x_train, x_test, y_train, y_test = train_test_split(x , y ,test_size = 0.2)
+  x_train, x_test, y_train, y_test = train_test_split(x , y ,test_size = 0.2 , random_state=42)
 
   # on transforme en matrice creuse d’occurrence des mots (on transforme x_train et on applique à x_test la transformation)
   # trans_vect = CountVectorizer()
   trans_vect = TfidfVectorizer()
-
+  # trans_vect.fit(x_train)
   x_train_trans = trans_vect.fit_transform(x_train)
+  # x_train_trans = trans_vect.transform(x_train)
   x_test_trans  = trans_vect.transform(x_test)
 
-
+ 
+  st.write('df_clean_2 :', df_clean_2.shape)
+  st.write('df2 :', df2.shape)
+  st.write('x :', x.shape)
+  st.write('y:', y.shape)
+  st.write('x_train_trans :', x_train_trans.shape)
+  st.write('x_test_trans :', x_test_trans.shape)
   ######################
 
   # (i) Dans le script Python, créer une fonction appelée prediction qui prend en argument le nom d'un classifieur et renvoie le classifieur entrainé.
 
   def prediction(classifier):
-      if classifier == 'Random Forest':
+      if classifier == 'SVC':
           clf = joblib.load("modele_svm_lib")
-          
-      elif classifier == 'SVC':
-          clf = joblib.load("modele_svm_lib")
-          
+                
       elif classifier == 'KNN':
           clf = joblib.load("modele_knn_lib")
 
@@ -316,29 +317,33 @@ if page == pages[3] :
       return clf
 
   # Puisque les classes ne sont pas déséquilibrées, il est intéressant de regarder l'accuracy des prédictions. Copiez le code suivant dans votre script Python. Il crée une fonction qui renvoie au choix l'accuracy ou la matrice de confusion.
-
+  
   def scores(clf, choice):
       if choice == 'Accuracy':
-          return clf.score(x_test_trans, y_test)
+          return clf.score(x_test_trans,y_test)
       elif choice == 'Confusion matrix':
           return confusion_matrix(y_test, clf.predict(x_test_trans))
-
-  # y_pred_knn = modele_knn.predict(x_test_trans)# Calculate predictions
-  # print("Accuracy pour KNN :", accuracy_score(y_test, y_pred_knn))
+  
+  
 
   # (j) Dans le script Python, utiliser la méthode st.selectbox() pour choisir entre le classifieur RandomForest, le classifieur SVM et le classifieur LogisticRegression. Puis retourner sur l'application web Streamlit pour visualiser la "select box".
-  choix = ['Random Forest', 'SVC', 'KNN','Naive Bayes','Gardient boosting']
+  choix = ['SVC', 'KNN','Naive Bayes','Gardient boosting']
   option = st.selectbox('Choix du modèle', choix)
   st.write('Le modèle choisi est :', option)
   
   # Il ne reste plus qu'à entrainer le classifieur choisi en utilisant la fonction prediction précédemment définie et à afficher les résultats.
   clf = prediction(option)
 
+  # y_pred = clf.predict(x_test_trans) # Calculate predictions
+  # st.write('Le modèle choisi est :', accuracy_score(y_test, y_pred))
+
   display = st.radio('Que souhaitez-vous montrer ?', ('Accuracy', 'Confusion matrix','Rapport'))
 
   if display == 'Accuracy':
-      clf
+      # clf
       st.write(scores(clf, display))
+      # y_pred = clf.predict(x_test_trans) # Calculate predictions
+      # st.write('Le modèle choisi est :', accuracy_score(y_test, y_pred))
 
   elif display == 'Confusion matrix':
       st.dataframe(scores(clf, display))
