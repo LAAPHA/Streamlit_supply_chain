@@ -1,2 +1,1 @@
-# streamlit_supply_chain
-Streamlit projet datascientest projet supply chain (M LAACHIR, S DIACQUENOD)
+# Supply_chain_juin23
