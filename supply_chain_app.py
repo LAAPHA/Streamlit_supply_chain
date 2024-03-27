@@ -57,17 +57,17 @@ st.markdown(
 
 
 
-df_liste_liens = pd.read_excel("Datas\liste_finale_à_scraper.xlsx", index_col=0)
+df_liste_liens = pd.read_excel("Datas/liste_finale_à_scraper.xlsx", index_col=0)
 # df_clean = pd.read_excel("Final_data_scraped_traité_traduit_ok_clean.xlsx", index_col=0)
 # df.head()
 
-df_clean_2 = joblib.load("models\data_clean_lib")
+df_clean_2 = joblib.load("models/data_clean_lib")
 df_clean_2 = df_clean_2.reset_index(drop = False)
 
 st.image("médias/bannière_smily.png", use_column_width=True)
 
 # ajout de titre et résumé
-st.title("Projet Supply Chain - Satisfaction des clients:")
+st.title("Projet Supply Chain - Satisfaction des clients:::")
 st.write(
     ":dog: Scraper, traiter et analyser les avis clients. le code source est disponible [ici](https://github.com/LAAPHA/Streamlit_supply_chain) sur GitHub. Special thanks to Datascientest :grin:"
 )
@@ -263,8 +263,8 @@ if page == pages[1] :
           df_liens = df_liens.sort_values(by=['categorie', 'reviews'], ascending=[True, False])
 
           ## enregistrer le dataframe traité en csv et excel: ne pas oublier de modififier _liste_liens4 pour ne pas ecraser l'ancien enregistrement
-          # df_liens.to_csv('Avis_trustpilot_liste_liens4.csv')
-          # df_liens.to_excel('Avis_trustpilot_liste_liens4.xlsx')
+          # df_liens.to_csv('résults/Avis_trustpilot_liste_liens4.csv')
+          # df_liens.to_excel('résults/Avis_trustpilot_liste_liens4.xlsx')
 
           st.dataframe(df_liens.head(10))
           st.write("La taille de df_liste_liens: ",df_liens.shape)
@@ -703,16 +703,16 @@ if page == pages[3] :
 
   def prediction(classifier):
       if classifier == 'Naive Bayes':
-          clf = joblib.load("models\modele_bayes_lib")
+          clf = joblib.load("models/modele_bayes_lib")
                 
       elif classifier == 'Gardient boosting':
-          clf = joblib.load("models\modele_gb_lib")
+          clf = joblib.load("models/modele_gb_lib")
 
       elif classifier == 'SVC':
-          clf = joblib.load("models\modele_svm_lib")
+          clf = joblib.load("models/modele_svm_lib")
 
       elif classifier == 'KNN':
-          clf = joblib.load("models\modele_knn_lib")
+          clf = joblib.load("models/modele_knn_lib")
 
       # clf.fit(X_train, y_train)
 
@@ -857,7 +857,7 @@ if page == pages[4] :
       kmeans.fit(tfidf_matrix)
       sse.append(kmeans.inertia_)
       
-  # sse = joblib.load("models\modele_clusters_lib")
+  # sse = joblib.load("models/modele_clusters_lib")
 
   st.markdown("<h3 style='text-align: left;'>Le nombre de clusters optimal:</h3>", unsafe_allow_html=True)
 
@@ -883,7 +883,7 @@ if page == pages[4] :
   # Appliquer KMeans avec le nombre optimal de clusters
   kmeans = KMeans(n_clusters=optimal_k, random_state=42)
   kmeans.fit(tfidf_matrix)
-  # kmeans = joblib.load("models\modele_kmeans1_lib")
+  # kmeans = joblib.load("models/modele_kmeans1_lib")
 
   # Ajouter les étiquettes de cluster à votre DataFrame
   df3['cluster'] = kmeans.labels_ + 1
