@@ -699,7 +699,7 @@ if page == pages[3] :
   x_train_trans = trans_vect.fit_transform(x_train)
   x_test_trans  = trans_vect.transform(x_test)
     
-  ######################
+  #####################
 
   # (i) Dans le script Python, créer une fonction appelée prediction qui prend en argument le nom d'un classifieur et renvoie le classifieur entrainé.
 
