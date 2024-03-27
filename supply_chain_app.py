@@ -1,5 +1,7 @@
 # chemain acces avec terminal: cd datascientest\Supply_chain_juin23\Streamlit
 # chemain acces avec terminal: cd C:\Users\laach\OneDrive\Documents\GitHub\Supply_chain_juin23\Streamlit
+# chemain acces avec terminal: cd C:\Users\laach\OneDrive\Documents\GitHub\Streamlit_supply_chain
+
 # st.set_page_config(layout="wide", page_title="Image Background Remover")
 # import des modèles
 
@@ -153,8 +155,8 @@ if page == pages[1] :
 
   ## mettre ici la liste des catégories à parcourir: alimenter cette liste par:
   
-  liste_liens1 = ['bank','mortgage_broker','travel_insurance_company','insurance_agency']
-  liste_liens2 = ['All','bank','mortgage_broker','travel_insurance_company','insurance_agency']
+  liste_liens1 = ['bank','mortgage_broker','travel_insurance_company','insurance_agency','distance_learning_center']
+  liste_liens2 = ['All','bank','mortgage_broker','travel_insurance_company','insurance_agency','distance_learning_center']
 
 #   st.write("les catégories à scraper:", liste_liens1)
   
@@ -278,196 +280,211 @@ if page == pages[1] :
           ax.set( ylabel="", xlabel="Nombre de campanies par catégories (secteurs)")
           sns.despine(left=True, bottom=True)
           st.pyplot(f)
-          ############### fin webscraping #################################################
+          ############### fin webscraping de la liste des liens #################################################
+          
+
+
+          ###################### debut de webscraping: de tous les liens-------------------------------------------------
+          st.markdown("<h2 style='text-align: left;'>Deuxième étape: Scraper les données:</h2>", unsafe_allow_html=True)
+          st.write("Vu le temps que cela prendra, nous allons scraper uniquement un échantillon des liens. On va scraper la première page de la catégorie bank")
+
+
+            ################################################ bouton Scraper tous les avis##############################################
+            # if st.button("Scraper tous les avis"):
+
+          st.dataframe(df_liens.head())
+
+          st.write("scraper les avis clients:")
+          # st.dataframe(df_liste_liens.head(10))
+          # Obtenez la date et l'heure actuelles
+          
+          date_actuelle = datetime.datetime.now()
+          # Affichez la date uniquement au format "Année-Mois-Jour"
+          st.write("Date du jour (format court) :", date_actuelle.strftime("%d-%m-%Y"))
+          
+          ## le dataframe de travail, choix des catégories à scraper: pour scraper en plusieurs morceaux
+          
+          # df_liens_filtré = df_liens.loc[(df_liens.head(2)) ]
+
+          df_liens_filtré = df_liens.loc[(df_liens['categorie']=='travel_insurance_company') ]
+          # df_liens_filtré = df_liens
+
+          # liste_liens = ['qonto.com' ,'anyti.me','chanel.com']
+          liste_cat = df_liens_filtré ['categorie'].unique()
+          st.write ('liste des catégories à scraper:\n', liste_cat)
+          
+
+          nombre_fichier = 0
+
+          for lien_cat in liste_cat:
+              ## parcourir la liste des liens pour plusieurs catégories
+              Data = {}
+              # création des  listes vides
+              tout , noms, date_commentaire, date_experience, notes, titre_com, companies, reponses = [],[],[],[],[],[],[],[]
+              commentaire, verified ,test, site,nombre_pages , date_scrap, date_reponse, date_rep,categorie_bis = [],[],[],[],[],[],[],[],[]
+
+              df_marque = df_liens_filtré.loc[df_liens_filtré ['categorie'] == lien_cat]
+
+              for lien_c in df_marque['liens_marque']:
+
+                  lien = 'https://www.trustpilot.com/review/'+str(lien_c)+'?page=1'
+
+                  # récupératu du code html de toute la page et le stocker dans une variable: soup
+                  try:
+                      page = requests.get(lien, verify = False)
+                      soup = bs(page.content, "lxml")
+                  except:
+                      st.write(f"Une exception s'est produite pour {lien_c}: {e}")
+                      # continue
+
+                  # Sélectionner la partie de la page qui contient les numéros de page
+                  pagination_div = soup.find('div', class_='styles_pagination__6VmQv')
+                  # Extraire les numéros de page en parcourant les éléments de la pagination
+                  page_numbers = []
+
+                  try:
+                      for item in pagination_div.find_all(['span']):
+                          page_numbers.append(item.get_text())
+
+                      # print(page_numbers)
+                      nb_pages = int(page_numbers[-2])
+                      # st.write(lien_c, 'contient : ',nb_pages, ' pages!')
+                  except:
+                      nb_pages = 1
+
+                  ### début de la boucle qui parcours les pages d'une marque X
+                  # for X in range(1,nb_pages+1):
+                  
+                  for X in range(1,2):
+
+                      # sleep(0) # attendre une demi seconde entre chaque page, pas obligé
+
+                      lien = 'https://www.trustpilot.com/review/'+str(lien_c)+'?page='+str(X)
+                      # récupératu du code html de toute la page et le stocker dans une variable: soup
+                      page = requests.get(lien, verify = False)
+                      soup = bs(page.content, "lxml")
+                      # print(soup.prettify())
+                      avis_clients = soup.find_all('div', attrs = {'class': "styles_cardWrapper__LcCPA styles_show__HUXRb styles_reviewCard__9HxJJ"})
+
+                      try:
+                          company = soup.find('h1',class_='typography_default__hIMlQ typography_appearance-default__AAY17 title_title__i9V__').text.strip() ## récupérer le nom de la marque
+                      except:
+                          company = None
+                      ## parcourir le code html (soup) pour extraire les informations des balises
+                      for avis in avis_clients:
+
+                          # tout.append(avis.find('div',class_='styles_reviewContent__0Q2Tg').text.strip())
+                          try:
+                              noms.append(avis.find('span',class_='typography_heading-xxs__QKBS8 typography_appearance-default__AAY17').text.strip())
+                          except:
+                              noms.append(None)
+                          try:
+                              titre_com.append(avis.find('h2',class_='typography_heading-s__f7029 typography_appearance-default__AAY17').text.strip())
+                          except:
+                              titre_com.append(None)
+                          try:
+                              commentaire.append(avis.find('p').text.strip())
+                          except:
+                              commentaire.append(None)
+                          try:
+                              reponses.append(avis.find('p',class_='typography_body-m__xgxZ_ typography_appearance-default__AAY17 styles_message__shHhX'))
+                          except:
+                              reponses.append(None)
+                          # try:
+                          # notes.append(avis.find('img')['alt'])
+                          # except:
+                          #   notes.append(None)
+                          try:
+                              notes.append(avis.find('div',class_='star-rating_starRating__4rrcf star-rating_medium__iN6Ty'))
+                          except:
+                              notes.append(None)
+                          try:
+                              date_experience.append(avis.find('p',class_='typography_body-m__xgxZ_ typography_appearance-default__AAY17').text.strip())
+                          except:
+                              date_experience.append(None)
+                          try:
+                              date_commentaire.append(avis.find('div',class_='styles_reviewHeader__iU9Px').text.strip())
+                          except:
+                              date_commentaire.append(None)
+                          # try:
+                          # date_reponse.append(avis.find('div',class_='styles_content__Hl2Mi'))
+                          # except:
+                          #   noms.append(None)
+                          try:
+                              companies.append(company)
+                          except:
+                              companies.append(None)
+                          try:
+                              site.append(lien)
+                          except:
+                              site.append(None)
+                          try:
+                              nombre_pages.append(nb_pages)
+                          except:
+                              nombre_pages.append(None)
+                          try:
+                              categorie_bis.append(lien_cat)
+                          except:
+                              categorie_bis.append(None)
+
+                          date_scrap.append(date_actuelle.strftime("%d-%m-%Y"))
+
+                  nombre_fichier+=1
+                  st.write('Nous avons scrapé ' ,nb_pages, ' pages du site: ', lien_cat , '/',lien_c, ' *** N°:***',nombre_fichier)
+
+              # création d'un dictionnaire avec les listes crées précédement
+              data = {
+                      'categorie_bis': categorie_bis,
+                      'companies': companies,
+                      'noms': noms,
+                      'titre_com': titre_com,
+                      'commentaire': commentaire,
+                      'reponses': reponses,
+                      'notes': notes,
+                      'date_experience': date_experience,
+                      'date_commentaire': date_commentaire,
+                      # 'date_reponse': date_reponse,
+                      'site': site,
+                      'nombre_pages': nombre_pages,
+                      'date_scrap': date_scrap
+                      }
+
+              # création de Dataframe pour y stocker les données
+              df = pd.DataFrame(data)
+              # enregistrer le dataframe dans un fichier .csv
+
+              # df.to_excel('Avis_trustpilot_supply_chain_brut_'+str(lien_cat)+'.xlsx')
+              # df.to_excel('Avis_trustpilot_supply_chain_brut_total.xlsx')
+
+              st.write('!!!!!!!!!!!!!!!!!La categorie !!' , lien_cat, '!! est scrapée et enregistrée en Excel!!!!!!!!!!!!!!')
+        
+          st.write("------------------------------------------------------------------------")
+          st.write('#### Résultats: données brutes scrapées:')
+          
+          st.write("Voici le Dataframe des données brutes scrapée (données non traitées). \nD'après ce que nous voyons ci-dessus, Les données scrapées nécessitent un traitement supplémentaire avec text mining. Nous allons aussi procéder à la création de nouvelles features engineering.")
+          
+          st.dataframe(df.head(10))
+
+          # st.write(df['companies'].value_counts())
+
+          st.write("La taille du df brute: ",df.shape)
+
+          # st.dataframe(df_liste_liens.describe())
+          # if st.checkbox("Afficher les NA") :
+          #   st.dataframe(df_liste_liens.isna().sum())
+
+
 
       else:
           st.warning("Veuillez saisir une URL valide.")
 
-  ##------------------------------------------------------------------------------------------        
-  ### debut de webscraping: de tous les liens-------------------------------------------------
+ 
   
-#   st.write("### Deuxième étape: Scraper les données:")
-  st.markdown("<h2 style='text-align: left;'>Deuxième étape: Scraper les données:</h2>", unsafe_allow_html=True)
-
-  st.write("Vu le temps que cela prendra, nous allons scraper uniquement un échantillon des liens. On va scraper la première page de la catégorie bank")        
+          
+          
   
-  if st.button("Scraper tous les avis"):
-    st.write("scraper les avis clients:")
-    st.dataframe(df_liste_liens.head(10))
-    # Obtenez la date et l'heure actuelles
-    
-    date_actuelle = datetime.datetime.now()
-    # Affichez la date uniquement au format "Année-Mois-Jour"
-    st.write("Date du jour (format court) :", date_actuelle.strftime("%d-%m-%Y"))
-    
-    ## le dataframe de travail, choix des catégories à scraper: pour scraper en plusieurs morceaux
-    
-    df_liens_filtré = df_liste_liens.loc[(df_liste_liens['categorie']=='bank') ]
-    # df_liens_filtré = df_liens.loc[(df_liens['categorie']=='bank') ]
-    # df_liens_filtré = concatenated_df
 
-    # liste_liens = ['qonto.com' ,'anyti.me','chanel.com']
-    liste_cat = df_liens_filtré ['categorie'].unique()
-    st.write ('liste des catégories à scraper:\n', liste_cat)
-    
-
-    nombre_fichier = 0
-
-    for lien_cat in liste_cat:
-        ## parcourir la liste des liens pour plusieurs catégories
-        Data = {}
-        # création des  listes vides
-        tout , noms, date_commentaire, date_experience, notes, titre_com, companies, reponses = [],[],[],[],[],[],[],[]
-        commentaire, verified ,test, site,nombre_pages , date_scrap, date_reponse, date_rep,categorie_bis = [],[],[],[],[],[],[],[],[]
-
-        df_marque = df_liens_filtré.loc[df_liens_filtré ['categorie'] == lien_cat]
-
-        for lien_c in df_marque['liens_marque']:
-
-            lien = 'https://www.trustpilot.com/review/'+str(lien_c)+'?page=1'
-
-            # récupératu du code html de toute la page et le stocker dans une variable: soup
-            try:
-                page = requests.get(lien, verify = False)
-                soup = bs(page.content, "lxml")
-            except:
-                st.write(f"Une exception s'est produite pour {lien_c}: {e}")
-                # continue
-
-            # Sélectionner la partie de la page qui contient les numéros de page
-            pagination_div = soup.find('div', class_='styles_pagination__6VmQv')
-            # Extraire les numéros de page en parcourant les éléments de la pagination
-            page_numbers = []
-
-            try:
-                for item in pagination_div.find_all(['span']):
-                    page_numbers.append(item.get_text())
-
-                # print(page_numbers)
-                nb_pages = int(page_numbers[-2])
-                # st.write(lien_c, 'contient : ',nb_pages, ' pages!')
-            except:
-                nb_pages = 1
-
-            ### début de la boucle qui parcours les pages d'une marque X
-            # for X in range(1,nb_pages+1):
-            
-            for X in range(1,2):
-
-                # sleep(0) # attendre une demi seconde entre chaque page, pas obligé
-
-                lien = 'https://www.trustpilot.com/review/'+str(lien_c)+'?page='+str(X)
-                # récupératu du code html de toute la page et le stocker dans une variable: soup
-                page = requests.get(lien, verify = False)
-                soup = bs(page.content, "lxml")
-                # print(soup.prettify())
-                avis_clients = soup.find_all('div', attrs = {'class': "styles_cardWrapper__LcCPA styles_show__HUXRb styles_reviewCard__9HxJJ"})
-
-                try:
-                    company = soup.find('h1',class_='typography_default__hIMlQ typography_appearance-default__AAY17 title_title__i9V__').text.strip() ## récupérer le nom de la marque
-                except:
-                    company = None
-                ## parcourir le code html (soup) pour extraire les informations des balises
-                for avis in avis_clients:
-
-                    # tout.append(avis.find('div',class_='styles_reviewContent__0Q2Tg').text.strip())
-                    try:
-                        noms.append(avis.find('span',class_='typography_heading-xxs__QKBS8 typography_appearance-default__AAY17').text.strip())
-                    except:
-                        noms.append(None)
-                    try:
-                        titre_com.append(avis.find('h2',class_='typography_heading-s__f7029 typography_appearance-default__AAY17').text.strip())
-                    except:
-                        titre_com.append(None)
-                    try:
-                        commentaire.append(avis.find('p').text.strip())
-                    except:
-                        commentaire.append(None)
-                    try:
-                        reponses.append(avis.find('p',class_='typography_body-m__xgxZ_ typography_appearance-default__AAY17 styles_message__shHhX'))
-                    except:
-                        reponses.append(None)
-                    # try:
-                    # notes.append(avis.find('img')['alt'])
-                    # except:
-                    #   notes.append(None)
-                    try:
-                        notes.append(avis.find('div',class_='star-rating_starRating__4rrcf star-rating_medium__iN6Ty'))
-                    except:
-                        notes.append(None)
-                    try:
-                        date_experience.append(avis.find('p',class_='typography_body-m__xgxZ_ typography_appearance-default__AAY17').text.strip())
-                    except:
-                        date_experience.append(None)
-                    try:
-                        date_commentaire.append(avis.find('div',class_='styles_reviewHeader__iU9Px').text.strip())
-                    except:
-                        date_commentaire.append(None)
-                    # try:
-                    # date_reponse.append(avis.find('div',class_='styles_content__Hl2Mi'))
-                    # except:
-                    #   noms.append(None)
-                    try:
-                        companies.append(company)
-                    except:
-                        companies.append(None)
-                    try:
-                        site.append(lien)
-                    except:
-                        site.append(None)
-                    try:
-                        nombre_pages.append(nb_pages)
-                    except:
-                        nombre_pages.append(None)
-                    try:
-                        categorie_bis.append(lien_cat)
-                    except:
-                        categorie_bis.append(None)
-
-                    date_scrap.append(date_actuelle.strftime("%d-%m-%Y"))
-
-            nombre_fichier+=1
-            st.write('Nous avons scrapé ' ,nb_pages, ' pages du site: ', lien_cat , '/',lien_c, ' *** N°:***',nombre_fichier)
-
-        # création d'un dictionnaire avec les listes crées précédement
-        data = {
-                'categorie_bis': categorie_bis,
-                'companies': companies,
-                'noms': noms,
-                'titre_com': titre_com,
-                'commentaire': commentaire,
-                'reponses': reponses,
-                'notes': notes,
-                'date_experience': date_experience,
-                'date_commentaire': date_commentaire,
-                # 'date_reponse': date_reponse,
-                'site': site,
-                'nombre_pages': nombre_pages,
-                'date_scrap': date_scrap
-                }
-
-        # création de Dataframe pour y stocker les données
-        df = pd.DataFrame(data)
-        # enregistrer le dataframe dans un fichier .csv
-
-        # df.to_excel('Avis_trustpilot_supply_chain_brut_'+str(lien_cat)+'.xlsx')
-        # df.to_excel('Avis_trustpilot_supply_chain_brut_total.xlsx')
-
-        st.write('!!!!!!!!!!!!!!!!!La categorie !!' , lien_cat, '!! est scrapée et enregistrée en Excel!!!!!!!!!!!!!!')
-   
-    st.write("------------------------------------------------------------------------")
-    st.write('#### Résultats: données brutes scrapées:')
-    
-    st.write("Voici le Dataframe des données brutes scrapée (données non traitées). \nD'après ce que nous voyons ci-dessus, Les données scrapées nécessitent un traitement supplémentaire avec text mining. Nous allons aussi procéder à la création de nouvelles features engineering.")
-    st.dataframe(df.head(10))
-    st.write(df['companies'].value_counts())
-    st.write("La taille du df brute: ",df.shape)
-
-  # st.dataframe(df_liste_liens.describe())
-  # if st.checkbox("Afficher les NA") :
-  #   st.dataframe(df_liste_liens.isna().sum())
-
-#   st.write("### Troixième étape: Data Cleaning & Feature engineering ")
+      
   st.markdown("<h2 style='text-align: left;'>Troixième étape: Data Cleaning & Feature engineering:</h2>", unsafe_allow_html=True)
 
   st.write("Cette étape de prétraitement des données est essentielle afin que les données soient prêtes pour l'analyse. Elle permet de réduire le bruit, de simplifier l’analyse et l'interprétation des résultats et de faciliter la création de modèles d'apprentissage automatique pour la prédiction de la satisfaction client. Une fois que les données sont traitées, il est possible de passer à l'exploration, à l'analyse et à la visualisation pour en tirer des informations précieuses.")
@@ -659,14 +676,18 @@ if page == pages[2] :
   st.write("------------------------------------------------------------------------")
   st.write("Nous observons des coefficients de corrélation élevés entre les variables que nous avions jugées précédemment pertinentes et la variable cible. Ainsi, il serait intéressant d’utiliser ces variables dans le modèle pour essayer d’expliquer et de prédire la variable cible. ")
 
+  # st.image("médias/graphe_corr.png", use_column_width=True)
+
   fig, ax = plt.subplots(figsize=(8,8))
   sns.heatmap(df_v.corr(), annot=True, ax=ax ,cmap='coolwarm')
-  st.write(fig)
+  st.pyplot(fig)
+
+  # st.write(fig)
     
     
 
-
-## '''''''''''''''la page de modélisation '''''''''''''''''''''''''''''''''''
+#################################################################################################################
+##################################################la page de modélisation ######################################
   
 if page == pages[3] : 
   
@@ -699,8 +720,6 @@ if page == pages[3] :
   x_train_trans = trans_vect.fit_transform(x_train)
   x_test_trans  = trans_vect.transform(x_test)
     
-  #####################
-
   # (i) Dans le script Python, créer une fonction appelée prediction qui prend en argument le nom d'un classifieur et renvoie le classifieur entrainé.
 
   def prediction(classifier):
@@ -756,26 +775,27 @@ if page == pages[3] :
       st.write('Le Rapport est en cours de construction...')
 
   st.write('présentation en colonnes')
-  col1, col2 = st.columns(2)
+  
+  # col1, col2 = st.columns(2)
   #   col1.st.scores(clf, display)
   #   col2.st.dataframe(scores(clf, display))
   
 
 
   # Ajouter des onglets
-  tabs = ["Page 1", "Page 2", "Page 3"]
-  selected_tab = st.sidebar.radio("Sélectionnez une page", tabs)
+  # tabs = ["Page 1", "Page 2", "Page 3"]
+  # selected_tab = st.sidebar.radio("Sélectionnez une page", tabs)
 
-  # Contenu des onglets
-  if selected_tab == "Page 1":
-    st.write("Contenu de la page 1")
-  elif selected_tab == "Page 2":
-    st.write("Contenu de la page 2")
-  elif selected_tab == "Page 3":
-    st.write("Contenu de la page 3")
+  # # Contenu des onglets
+  # if selected_tab == "Page 1":
+  #   st.write("Contenu de la page 1")
+  # elif selected_tab == "Page 2":
+  #   st.write("Contenu de la page 2")
+  # elif selected_tab == "Page 3":
+  #   st.write("Contenu de la page 3")
 
   # Sélection de l'onglet
-  liste_tab = []
+  
 
   tab1, tab2, tab3 = st.tabs(["rapport 1", "rapport 2", "rapport 3"])
 
@@ -795,8 +815,8 @@ if page == pages[3] :
     
 
 
-
-### ####################### Le clustering ###################################################
+#################################################################################################################################
+### ########################################################### Le clustering ###################################################
 if page == pages[4] :
   
   colonnes_à_supprimer = ['verified', 'nombre_caractères', 'nombre_caractères', 'nombre_maj', 'nombre_car_spé', 'emojis_positifs_count',
@@ -808,21 +828,19 @@ if page == pages[4] :
    ## supprimer les colonnes inutiles
   df3 = df_clean_2.drop(columns=colonnes_à_supprimer)
   #Affiche le nombre de doublons
-  st.write("Avant suppression duplicates", df3.shape)
-
-  nombre_doublon = df3.duplicated().sum()
-  st.write("Nombre de doublons :", nombre_doublon)
-
+  # st.write("Avant suppression duplicates", df3.shape)
+  # nombre_doublon = df3.duplicated().sum()
+  # st.write("Nombre de doublons :", nombre_doublon)
   #Supprime les doublons
   df3 = df3.drop_duplicates()
   df3 = df3.dropna(subset=['commentaire_clean'])
-  st.write(nombre_doublon , "lignes doublons supprimées:")
+  # st.write(nombre_doublon , "lignes doublons supprimées:")
 
-  st.write("Après suppression duplicates", df3.shape)
+  # st.write("Après suppression duplicates", df3.shape)
 
-  st.markdown("<h2 style='text-align: left;'>Le Clusternig:</h2>", unsafe_allow_html=True)
+  st.markdown("<h2 style='text-align: left;'>Le Clusternig</h2>", unsafe_allow_html=True)
 
-  st.markdown("<h3 style='text-align: left;'>Définition du Clustering:</h3>", unsafe_allow_html=True)
+  st.markdown("<h3 style='text-align: left;'>Objectif:</h3>", unsafe_allow_html=True)
 
   st.markdown("<p style='text-align: left;'>Le clustering (Le partitionnement de données) consiste à créer des groupes "
               "d'individus de telle sorte que les individus d'un groupe donné aient tendance à être similaires, et en même "
@@ -837,8 +855,8 @@ if page == pages[4] :
               " : secteur bancaire, secteur de l’habillement, secteur de voyage et vacances secteur technologiques… "
                " Nous allons donc isoler une catégorie avant de faire le clusternig </p>", unsafe_allow_html=True)
 
-  # notes__bis = [0,1 ]
-  notes__bis = st.sidebar.radio("Choisissez les notes à analyser:", [0,1])
+  notes__bis = 0
+  # notes__bis = st.sidebar.radio("Choisissez les notes à analyser:", [0,1])
 
   liste_liens2 = ['bank','mortgage_broker','travel_insurance_company','insurance_agency']
   catégorie_ = st.sidebar.selectbox('Choisissez la catégorie à analyser:', liste_liens2)
