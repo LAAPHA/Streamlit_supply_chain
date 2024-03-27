@@ -2,6 +2,7 @@
 # chemain acces avec terminal: cd C:\Users\laach\OneDrive\Documents\GitHub\Supply_chain_juin23\Streamlit
 # st.set_page_config(layout="wide", page_title="Image Background Remover")
 # import des modèles
+
 import streamlit as st
 import pandas as pd
 import numpy as np
