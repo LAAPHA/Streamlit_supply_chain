@@ -10,3 +10,4 @@ joblib
 bs4
 requests
 wordcloud
+openpyxl
