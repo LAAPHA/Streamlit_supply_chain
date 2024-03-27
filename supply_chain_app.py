@@ -1,14 +1,13 @@
 # chemain acces avec terminal: cd datascientest\Supply_chain_juin23\Streamlit
 # chemain acces avec terminal: cd C:\Users\laach\OneDrive\Documents\GitHub\Supply_chain_juin23\Streamlit
 # st.set_page_config(layout="wide", page_title="Image Background Remover")
+# import des modèles
 import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
-
-# import des modèles
 from sklearn.metrics import roc_auc_score, accuracy_score, confusion_matrix
 from sklearn.metrics import classification_report
 from sklearn.linear_model import LogisticRegression
@@ -22,17 +21,9 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.cluster import KMeans
-
 import joblib
 from time import sleep
 import datetime
-# on commence par transformer notre variable à prédire en variable binaire
-encode_y = LabelEncoder()
-# import warnings
-# warnings.filterwarnings("ignore")
-# from selenium import webdriver
-# from webdriver_manager.chrome import ChromeDriverManager
-# from selenium.webdriver.common.keys import Keys
 import re
 from bs4 import BeautifulSoup as bs
 import requests
@@ -66,11 +57,11 @@ st.markdown(
 
 
 
-df_liste_liens = pd.read_excel("liste_finale_à_scraper.xlsx", index_col=0)
+df_liste_liens = pd.read_excel("Datas\liste_finale_à_scraper.xlsx", index_col=0)
 # df_clean = pd.read_excel("Final_data_scraped_traité_traduit_ok_clean.xlsx", index_col=0)
 # df.head()
 
-df_clean_2 = joblib.load("data_clean_lib")
+df_clean_2 = joblib.load("models\data_clean_lib")
 df_clean_2 = df_clean_2.reset_index(drop = False)
 
 st.image("médias/bannière_smily.png", use_column_width=True)
@@ -78,7 +69,7 @@ st.image("médias/bannière_smily.png", use_column_width=True)
 # ajout de titre et résumé
 st.title("Projet Supply Chain - Satisfaction des clients:")
 st.write(
-    ":dog: Scraper, traiter et analyser les avis clients. le code source est disponible [ici](https://github.com/DataScientest-Studio/Supply_chain_juin23) sur GitHub. Special thanks to Datascientest :grin:"
+    ":dog: Scraper, traiter et analyser les avis clients. le code source est disponible [ici](https://github.com/LAAPHA/Streamlit_supply_chain) sur GitHub. Special thanks to Datascientest :grin:"
 )
 st.markdown("***")
 
@@ -89,8 +80,6 @@ st.sidebar.title("Sommaire")
 pages=["Introduction", "Préparation des données", "Data Visualization", "Modélisation", "Clustering"]
 
 page = st.sidebar.radio("Aller vers", pages)
-
-
 
 
 ## page introduction et présentation de projet
@@ -694,8 +683,9 @@ if page == pages[3] :
   df2 = df2.drop_duplicates()
   df2 = df2.dropna(subset = ['commentaire_clean_pos_tag'])
 
-    ## preparation des données pour modeles
-
+  ## preparation des données pour modeles
+  # on commence par transformer notre variable à prédire en variable binaire
+  encode_y = LabelEncoder()
   x = df2["commentaire_clean_pos_tag"] ## ajouter POS Tagging
   y = encode_y.fit_transform(df2["notes_bis"])
 # on sépare en apprentissage/validation
@@ -713,16 +703,16 @@ if page == pages[3] :
 
   def prediction(classifier):
       if classifier == 'Naive Bayes':
-          clf = joblib.load("modele_bayes_lib")
+          clf = joblib.load("models\modele_bayes_lib")
                 
       elif classifier == 'Gardient boosting':
-          clf = joblib.load("modele_gb_lib")
+          clf = joblib.load("models\modele_gb_lib")
 
       elif classifier == 'SVC':
-          clf = joblib.load("modele_svm_lib")
+          clf = joblib.load("models\modele_svm_lib")
 
       elif classifier == 'KNN':
-          clf = joblib.load("modele_knn_lib")
+          clf = joblib.load("models\modele_knn_lib")
 
       # clf.fit(X_train, y_train)
 
@@ -867,7 +857,7 @@ if page == pages[4] :
       kmeans.fit(tfidf_matrix)
       sse.append(kmeans.inertia_)
       
-  # sse = joblib.load("modele_clusters_lib")
+  # sse = joblib.load("models\modele_clusters_lib")
 
   st.markdown("<h3 style='text-align: left;'>Le nombre de clusters optimal:</h3>", unsafe_allow_html=True)
 
@@ -893,7 +883,7 @@ if page == pages[4] :
   # Appliquer KMeans avec le nombre optimal de clusters
   kmeans = KMeans(n_clusters=optimal_k, random_state=42)
   kmeans.fit(tfidf_matrix)
-  # kmeans = joblib.load("modele_kmeans1_lib")
+  # kmeans = joblib.load("models\modele_kmeans1_lib")
 
   # Ajouter les étiquettes de cluster à votre DataFrame
   df3['cluster'] = kmeans.labels_ + 1

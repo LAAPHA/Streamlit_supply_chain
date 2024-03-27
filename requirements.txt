@@ -1,6 +1,10 @@
-streamlit==1.29.0
+streamlit
 scikit-learn
-altair>=4.0
-pandas==1.5.2
-streamlit_option_menu
+altair
+pandas
+numpy
 plotly
+matplotlib
+joblib
+bs4
+requests
