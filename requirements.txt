@@ -9,3 +9,4 @@ seaborn
 joblib
 bs4
 requests
+wordcloud

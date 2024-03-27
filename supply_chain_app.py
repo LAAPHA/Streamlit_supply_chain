@@ -28,6 +28,7 @@ import datetime
 import re
 from bs4 import BeautifulSoup as bs
 import requests
+from wordcloud import WordCloud
 
 
 # Ajouter du style CSS personnalisé
@@ -934,8 +935,6 @@ if page == pages[4] :
 
   # Sélection de l'onglet
   
-  from wordcloud import WordCloud
-
   # liste_tab = [int(valeur) for valeur in liste_tab]
 
   # tab_cluster = st.radio("Choisissez les notes à analyser:", liste_tab)
@@ -1017,130 +1016,130 @@ st.sidebar.markdown("[Sabrina DIACQUENOD](https://www.laapha.com)")
 
 
 ####################    divers   ##########""
-# if page == pages[5] : 
-if page == 5: 
-  from PIL import Image
-  from io import BytesIO
-  import base64
+# # if page == pages[5] : 
+# if page == 5: 
+#   from PIL import Image
+#   from io import BytesIO
+#   import base64
 
-  st.write("#### Afficher un slider de 1 à 7")
-  st.slider('Slider', 1, 7)
+#   st.write("#### Afficher un slider de 1 à 7")
+#   st.slider('Slider', 1, 7)
 
-  st.write("#### Afficher un slider de Lundi à Dimanche")
-  st.select_slider('Choisir un jour de la semaine', options=
-  ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'])
+#   st.write("#### Afficher un slider de Lundi à Dimanche")
+#   st.select_slider('Choisir un jour de la semaine', options=
+#   ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'])
 
-  st.write("#### Inserer")
-  st.text_input('Insérez votre texte')
-  st.number_input('Choisissez votre nombre')
-  st.date_input('Choisissez une date')             
-  st.time_input('Choisissez un horaire')
-  st.file_uploader('Importer votre fichier')
-  st.code(''' import streamlit ''', language='python')
+#   st.write("#### Inserer")
+#   st.text_input('Insérez votre texte')
+#   st.number_input('Choisissez votre nombre')
+#   st.date_input('Choisissez une date')             
+#   st.time_input('Choisissez un horaire')
+#   st.file_uploader('Importer votre fichier')
+#   st.code(''' import streamlit ''', language='python')
 
-  st.markdown("Ceci est un [lien hypertexte](https://www.example.com) vers Example.com.")
+#   st.markdown("Ceci est un [lien hypertexte](https://www.example.com) vers Example.com.")
 
-  # st.image(image, caption='C est une image')
+#   # st.image(image, caption='C est une image')
            
-  # pip install streamlit-drawable-canvas
-  # streamlit-drawable-canvas()
-  st.sidebar.write("## Upload and download :gear:")
+#   # pip install streamlit-drawable-canvas
+#   # streamlit-drawable-canvas()
+#   st.sidebar.write("## Upload and download :gear:")
 
-  ###########test imoprt images....
-  MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+#   ###########test imoprt images....
+#   MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
-  # Download the fixed image
-  def convert_image(img):
-    buf = BytesIO()
-    img.save(buf, format="PNG")
-    byte_im = buf.getvalue()
-    return byte_im
+#   # Download the fixed image
+#   def convert_image(img):
+#     buf = BytesIO()
+#     img.save(buf, format="PNG")
+#     byte_im = buf.getvalue()
+#     return byte_im
 
-  def fix_image(upload):
-    image = Image.open(upload)
-    col1.write("Original Image :camera:")
-    col1.image(image)
+#   def fix_image(upload):
+#     image = Image.open(upload)
+#     col1.write("Original Image :camera:")
+#     col1.image(image)
 
-    # fixed = remove(image)
-    col2.write("Fixed Image :wrench:")
-    col2.image(image)
-    st.sidebar.markdown("\n")
-    st.sidebar.download_button("Download fixed image", convert_image(image), "fixed.png", "image/png")
+#     # fixed = remove(image)
+#     col2.write("Fixed Image :wrench:")
+#     col2.image(image)
+#     st.sidebar.markdown("\n")
+#     st.sidebar.download_button("Download fixed image", convert_image(image), "fixed.png", "image/png")
 
 
-  col1, col2 = st.columns(2)
+#   col1, col2 = st.columns(2)
 
-  my_upload = st.sidebar.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
+#   my_upload = st.sidebar.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
 
-  if my_upload is not None:
-    if my_upload.size > MAX_FILE_SIZE:
-        st.error("The uploaded file is too large. Please upload an image smaller than 5MB.")
-    else:
-        fix_image(upload=my_upload)
-  else:
-    fix_image("./zebra.jpg")
+#   if my_upload is not None:
+#     if my_upload.size > MAX_FILE_SIZE:
+#         st.error("The uploaded file is too large. Please upload an image smaller than 5MB.")
+#     else:
+#         fix_image(upload=my_upload)
+#   else:
+#     fix_image("./zebra.jpg")
 
-    ## permets d'afficher une table df et colorier le max en jaune
-  st.write("Avec un dataframe fixe")
-  dataframe = pd.DataFrame(
-    np.random.randn(10, 8),
-    columns=('col %d' % i for i in range(8)))
+#     ## permets d'afficher une table df et colorier le max en jaune
+#   st.write("Avec un dataframe fixe")
+#   dataframe = pd.DataFrame(
+#     np.random.randn(10, 8),
+#     columns=('col %d' % i for i in range(8)))
 
-  st.dataframe(dataframe.style.highlight_max(axis=0))
-  ## table
-  st.write("Avec une table fixe")
-  dataframe = pd.DataFrame(
-    np.random.randn(10, 20),
-    columns=('col %d' % i for i in range(20)))
-  st.table(dataframe)
+#   st.dataframe(dataframe.style.highlight_max(axis=0))
+#   ## table
+#   st.write("Avec une table fixe")
+#   dataframe = pd.DataFrame(
+#     np.random.randn(10, 20),
+#     columns=('col %d' % i for i in range(20)))
+#   st.table(dataframe)
   
-  #   st.text_input("Your name", key="name")
-  st.write("You can access the value at any point with key: URL est défini dans une autre page")
-  st.write(" la valeur de url est: \n",st.session_state.URL)
+#   #   st.text_input("Your name", key="name")
+#   st.write("You can access the value at any point with key: URL est défini dans une autre page")
+#   st.write(" la valeur de url est: \n",st.session_state.URL)
 
-  col3, col4 = st.columns(2)
-  col3.write("fin col 3")
-  col4.write("fin col 4")
+#   col3, col4 = st.columns(2)
+#   col3.write("fin col 3")
+#   col4.write("fin col 4")
 
 
 
-  ############################## Fonction pour scraper le lien avec BeautifulSoup
-  st.write("### Fonction pour scraper le lien avec BeautifulSoup")
-  # Fonction pour scraper le lien avec BeautifulSoup
-  def scrape_link(url):
-      try:
-          # Obtenir le contenu de la page web
-          response = requests.get(url,verify = False)
-          soup = bs(response.content, 'html.parser')
+#   ############################## Fonction pour scraper le lien avec BeautifulSoup
+#   st.write("### Fonction pour scraper le lien avec BeautifulSoup")
+#   # Fonction pour scraper le lien avec BeautifulSoup
+#   def scrape_link(url):
+#       try:
+#           # Obtenir le contenu de la page web
+#           response = requests.get(url,verify = False)
+#           soup = bs(response.content, 'html.parser')
 
-          # Ici, vous pouvez ajouter votre logique de scraping en utilisant BeautifulSoup
-          # Par exemple, si vous voulez extraire tous les liens de la page :
-          links = soup.find_all('a')
-          extracted_links = [link.get('href') for link in links]
+#           # Ici, vous pouvez ajouter votre logique de scraping en utilisant BeautifulSoup
+#           # Par exemple, si vous voulez extraire tous les liens de la page :
+#           links = soup.find_all('a')
+#           extracted_links = [link.get('href') for link in links]
 
-          return extracted_links
+#           return extracted_links
 
-      except Exception as e:
-          st.error(f"Une erreur s'est produite : {e}")
-          return []
+#       except Exception as e:
+#           st.error(f"Une erreur s'est produite : {e}")
+#           return []
 
-  # Interface Streamlit
-  st.title("Scraping avec BeautifulSoup")
+#   # Interface Streamlit
+#   st.title("Scraping avec BeautifulSoup")
 
-  # Champ de saisie pour l'URL
-  url = st.text_input('Entrez une URL à scraper :', 'https://www.laapha.com')
+#   # Champ de saisie pour l'URL
+#   url = st.text_input('Entrez une URL à scraper :', 'https://www.laapha.com')
 
-  # Bouton pour lancer le scraping
-  if st.button("Scrape"):
-      if url:
-          # Appeler la fonction de scraping
-          scraped_data = scrape_link(url)
+#   # Bouton pour lancer le scraping
+#   if st.button("Scrape"):
+#       if url:
+#           # Appeler la fonction de scraping
+#           scraped_data = scrape_link(url)
           
-          # Afficher les résultats
-          st.write("Liens extraits de la page :")
-          for link in scraped_data:
-              st.write(link)
-      else:
-          st.warning("Veuillez saisir une URL valide.")
+#           # Afficher les résultats
+#           st.write("Liens extraits de la page :")
+#           for link in scraped_data:
+#               st.write(link)
+#       else:
+#           st.warning("Veuillez saisir une URL valide.")
 
-  st.image("médias/avis_clients.png",  caption='Avis clients',  use_column_width=False, width=200 )
+st.image("médias/avis_clients.png",  caption='Avis clients',  use_column_width=False, width=50 )
