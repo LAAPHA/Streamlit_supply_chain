@@ -4,37 +4,3 @@ altair>=4.0
 pandas==1.5.2
 streamlit_option_menu
 plotly
-
-
-import streamlit as st
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-import plotly.express as px
-
-from sklearn.metrics import roc_auc_score, accuracy_score, confusion_matrix
-from sklearn.metrics import classification_report
-
-import joblib
-
-from sklearn.metrics import roc_auc_score, accuracy_score, confusion_matrix
-from sklearn.metrics import classification_report
-from sklearn.linear_model import LogisticRegression
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.svm import SVC
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.ensemble import RandomForestClassifier
-
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import LabelEncoder
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.model_selection import train_test_split
-from sklearn.cluster import KMeans
-
-from time import sleep
-import datetime
-import re
-from bs4 import BeautifulSoup as bs
-import requests
