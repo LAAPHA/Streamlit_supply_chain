@@ -1,3 +1,11 @@
+streamlit==1.29.0
+scikit-learn
+altair>=4.0
+pandas==1.5.2
+streamlit_option_menu
+plotly
+
+
 import streamlit as st
 import pandas as pd
 import numpy as np
