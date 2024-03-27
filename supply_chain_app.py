@@ -145,7 +145,7 @@ if page == pages[1] :
   st.markdown("<h1 style='text-align: center;'> Webscraping: Préparation et ciblage des données à scraper </h1>", unsafe_allow_html=True)
 
 #   st.write("### Première étape: Préparation de la liste des liens à scraper:")
-  st.markdown("<h2 style='text-align: left;'>Première étape: Préparation de la liste des liens à scraper:</h2>", unsafe_allow_html=True)
+  st.markdown("<h2 style='text-align: left;'>Première étape: Analyse du site à scraper:</h2>", unsafe_allow_html=True)
 
   st.write("------------------------------------------------------------------------")
  
@@ -155,8 +155,8 @@ if page == pages[1] :
 
   ## mettre ici la liste des catégories à parcourir: alimenter cette liste par:
   
-  liste_liens1 = ['bank','mortgage_broker','travel_insurance_company','insurance_agency','distance_learning_center']
-  liste_liens2 = ['All','bank','mortgage_broker','travel_insurance_company','insurance_agency','distance_learning_center']
+  liste_liens1 = ['bank','mortgage_broker','travel_insurance_company','distance_learning_center']
+  liste_liens2 = ['All','bank','mortgage_broker','travel_insurance_company','distance_learning_center']
 
 #   st.write("les catégories à scraper:", liste_liens1)
   
@@ -167,6 +167,9 @@ if page == pages[1] :
   st.image("médias/schéma_site.png",  caption='La structure du site', use_column_width=True)
   
   st.write("------------------------------------------------------------------------")
+
+  st.markdown("<h2 style='text-align: left;'>Deuxième étape: Préparation de la liste des liens et Scraper les données:</h2>", unsafe_allow_html=True)
+  st.write("Vu le temps que cela prendra, nous allons scraper uniquement un échantillon des liens. On va scraper la première page de la catégorie bank")
 
   st.markdown("<p style='text-align: center;'>!!Ce formulaire est adapté uniquement au site truspilot. Des modifications mineures sont nécessaires pour le généraliser!! <br> </p>", unsafe_allow_html=True)
 
@@ -186,9 +189,9 @@ if page == pages[1] :
       
       if url:
           
-          for lien_c in liste_f:
+          for lien_cc in liste_f:
                        
-            lien = str(url) + '/' + str(lien_c) +'?country=FR'
+            lien = str(url) + '/' + str(lien_cc) +'?country=FR'
             
             # récupératu du code html de toute la page et le stocker dans une variable: soup
             page = requests.get(lien, verify = False)
@@ -206,13 +209,13 @@ if page == pages[1] :
             #       page_numbers.append(1)
             # # print(page_numbers)
             # nb_pages = int(page_numbers[-2])
-            # print(lien_c,'contient :',nb_pages, 'pages!')
+            # print(lien_cc,'contient :',nb_pages, 'pages!')
 
             ### début de la boucle qui parcours les pages d'une marque X
             for X in range(1,2+1):
 
                 sleep(0) # attendre une demi seconde entre chaque page, pas obligé
-                lien2 = str(url)+'/'+str(lien_c)+'?country=FR&page='+str(X)
+                lien2 = str(url)+'/'+str(lien_cc)+'?country=FR&page='+str(X)
                 
                 # récupératu du code html de toute la page et le stocker dans une variable: soup
                 page = requests.get(lien2, verify = False)
@@ -228,7 +231,7 @@ if page == pages[1] :
                   liens_marque.append(lien_m.find('a',class_ ='link_internal__7XN06 link_wrapper__5ZJEx styles_linkWrapper__UWs5j').get('href'))
                   reviews.append(lien_m.find('p',class_ ='typography_body-m__xgxZ_ typography_appearance-subtle__8_H2l styles_ratingText__yQ5S7'))
                   # reviews.append(lien_m.find('div',class_ ='styles_rating__pY5Pk'))
-                  categorie.append(lien_c)
+                  categorie.append(lien_cc)
                   pays.append("FR")
 
 
@@ -285,8 +288,6 @@ if page == pages[1] :
 
 
           ###################### debut de webscraping: de tous les liens-------------------------------------------------
-          st.markdown("<h2 style='text-align: left;'>Deuxième étape: Scraper les données:</h2>", unsafe_allow_html=True)
-          st.write("Vu le temps que cela prendra, nous allons scraper uniquement un échantillon des liens. On va scraper la première page de la catégorie bank")
 
 
             ################################################ bouton Scraper tous les avis##############################################
@@ -294,39 +295,51 @@ if page == pages[1] :
 
           st.dataframe(df_liens.head())
 
-          st.write("scraper les avis clients:")
+          st.write("scraper les avis clients: opération encours.... ")
           # st.dataframe(df_liste_liens.head(10))
           # Obtenez la date et l'heure actuelles
           
           date_actuelle = datetime.datetime.now()
           # Affichez la date uniquement au format "Année-Mois-Jour"
-          st.write("Date du jour (format court) :", date_actuelle.strftime("%d-%m-%Y"))
+          # st.write("Date du jour (format court) :", date_actuelle.strftime("%d-%m-%Y"))
           
           ## le dataframe de travail, choix des catégories à scraper: pour scraper en plusieurs morceaux
           
           # df_liens_filtré = df_liens.loc[(df_liens.head(2)) ]
 
-          df_liens_filtré = df_liens.loc[(df_liens['categorie']=='travel_insurance_company') ]
-          # df_liens_filtré = df_liens
+          if lien_c == 'All':
+              liste_f = liste_liens1
+          else:
+              liste_f = [lien_c]
+
+
+          # df_liens_filtré = df_liens.loc[(df_liens['categorie']=='travel_insurance_company') ]
+          df_liens_filtré = df_liens
 
           # liste_liens = ['qonto.com' ,'anyti.me','chanel.com']
-          liste_cat = df_liens_filtré ['categorie'].unique()
-          st.write ('liste des catégories à scraper:\n', liste_cat)
+
+          # liste_cat = df_liens_filtré ['categorie'].unique()
+          # st.write ('liste des catégories à scraper:\n', liste_cat)
           
 
           nombre_fichier = 0
 
-          for lien_cat in liste_cat:
+          Data = {}   # désactiver cette ligne pour enregistrer un fichier par catégorie
+          tout , noms, date_commentaire, date_experience, notes, titre_com, companies, reponses = [],[],[],[],[],[],[],[]
+          commentaire, verified ,test, site,nombre_pages , date_scrap, date_reponse, date_rep,categorie_bis = [],[],[],[],[],[],[],[],[]
+
+          for lien_cat in liste_f:
               ## parcourir la liste des liens pour plusieurs catégories
-              Data = {}
+
+              # Data = {}  # activer cette ligne pour enregistrer un fichier par catégorie!!
+
               # création des  listes vides
-              tout , noms, date_commentaire, date_experience, notes, titre_com, companies, reponses = [],[],[],[],[],[],[],[]
-              commentaire, verified ,test, site,nombre_pages , date_scrap, date_reponse, date_rep,categorie_bis = [],[],[],[],[],[],[],[],[]
+              
 
               df_marque = df_liens_filtré.loc[df_liens_filtré ['categorie'] == lien_cat]
 
               for lien_c in df_marque['liens_marque']:
-
+                  
                   lien = 'https://www.trustpilot.com/review/'+str(lien_c)+'?page=1'
 
                   # récupératu du code html de toute la page et le stocker dans une variable: soup
@@ -430,10 +443,14 @@ if page == pages[1] :
                           date_scrap.append(date_actuelle.strftime("%d-%m-%Y"))
 
                   nombre_fichier+=1
-                  st.write('Nous avons scrapé ' ,nb_pages, ' pages du site: ', lien_cat , '/',lien_c, ' *** N°:***',nombre_fichier)
 
-              # création d'un dictionnaire avec les listes crées précédement
-              data = {
+                  # st.write('Nous avons scrapé ' ,nb_pages, ' pages du site: ', lien_cat , '/',lien_c, ' *** N°:***',nombre_fichier)
+
+
+              st.write('!!!!!!!!!!!!!!!!!La categorie !!' , lien_cat, '!! est scrapée et enregistrée en Excel!!!!!!!!!!!!!!')
+          
+          # création d'un dictionnaire avec les listes crées précédement
+          data = {
                       'categorie_bis': categorie_bis,
                       'companies': companies,
                       'noms': noms,
@@ -447,17 +464,20 @@ if page == pages[1] :
                       'site': site,
                       'nombre_pages': nombre_pages,
                       'date_scrap': date_scrap
-                      }
+                  }
 
               # création de Dataframe pour y stocker les données
-              df = pd.DataFrame(data)
+              # df = pd.DataFrame(data)
               # enregistrer le dataframe dans un fichier .csv
 
               # df.to_excel('Avis_trustpilot_supply_chain_brut_'+str(lien_cat)+'.xlsx')
               # df.to_excel('Avis_trustpilot_supply_chain_brut_total.xlsx')
 
-              st.write('!!!!!!!!!!!!!!!!!La categorie !!' , lien_cat, '!! est scrapée et enregistrée en Excel!!!!!!!!!!!!!!')
-        
+              
+
+          # création de Dataframe pour y stocker les données
+          df = pd.DataFrame(data)
+
           st.write("------------------------------------------------------------------------")
           st.write('#### Résultats: données brutes scrapées:')
           
@@ -467,7 +487,8 @@ if page == pages[1] :
 
           # st.write(df['companies'].value_counts())
 
-          st.write("La taille du df brute: ",df.shape)
+          st.write(df['categorie_bis'].value_counts())
+          st.write("La taille du df brut: ",df.shape)
 
           # st.dataframe(df_liste_liens.describe())
           # if st.checkbox("Afficher les NA") :
@@ -478,13 +499,12 @@ if page == pages[1] :
       else:
           st.warning("Veuillez saisir une URL valide.")
 
- 
-  
-          
+           
           
   
 
-      
+  st.write("------------------------------------------------------------------------")
+    
   st.markdown("<h2 style='text-align: left;'>Troixième étape: Data Cleaning & Feature engineering:</h2>", unsafe_allow_html=True)
 
   st.write("Cette étape de prétraitement des données est essentielle afin que les données soient prêtes pour l'analyse. Elle permet de réduire le bruit, de simplifier l’analyse et l'interprétation des résultats et de faciliter la création de modèles d'apprentissage automatique pour la prédiction de la satisfaction client. Une fois que les données sont traitées, il est possible de passer à l'exploration, à l'analyse et à la visualisation pour en tirer des informations précieuses.")
@@ -676,11 +696,11 @@ if page == pages[2] :
   st.write("------------------------------------------------------------------------")
   st.write("Nous observons des coefficients de corrélation élevés entre les variables que nous avions jugées précédemment pertinentes et la variable cible. Ainsi, il serait intéressant d’utiliser ces variables dans le modèle pour essayer d’expliquer et de prédire la variable cible. ")
 
-  # st.image("médias/graphe_corr.png", use_column_width=True)
+  st.image("médias/graphe_corr.png", use_column_width=True)
 
-  fig, ax = plt.subplots(figsize=(8,8))
-  sns.heatmap(df_v.corr(), annot=True, ax=ax ,cmap='coolwarm')
-  st.pyplot(fig)
+  # fig, ax = plt.subplots(figsize=(8,8))
+  # sns.heatmap(df_v.corr(), annot=True, ax=ax ,cmap='coolwarm')
+  # st.pyplot(fig)
 
   # st.write(fig)
     
