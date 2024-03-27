@@ -2,6 +2,7 @@
 # chemain acces avec terminal: cd C:\Users\laach\OneDrive\Documents\GitHub\Supply_chain_juin23\Streamlit
 # st.set_page_config(layout="wide", page_title="Image Background Remover")
 # import des modèles
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -57,11 +58,11 @@ st.markdown(
 
 
 
-df_liste_liens = pd.read_excel("Datas\liste_finale_à_scraper.xlsx", index_col=0)
+df_liste_liens = pd.read_excel("Datas/liste_finale_à_scraper.xlsx", index_col=0)
 # df_clean = pd.read_excel("Final_data_scraped_traité_traduit_ok_clean.xlsx", index_col=0)
 # df.head()
 
-df_clean_2 = joblib.load("models\data_clean_lib")
+df_clean_2 = joblib.load("models/data_clean_lib")
 df_clean_2 = df_clean_2.reset_index(drop = False)
 
 st.image("médias/bannière_smily.png", use_column_width=True)
@@ -703,16 +704,16 @@ if page == pages[3] :
 
   def prediction(classifier):
       if classifier == 'Naive Bayes':
-          clf = joblib.load("models\modele_bayes_lib")
+          clf = joblib.load("models/modele_bayes_lib")
                 
       elif classifier == 'Gardient boosting':
-          clf = joblib.load("models\modele_gb_lib")
+          clf = joblib.load("models/modele_gb_lib")
 
       elif classifier == 'SVC':
-          clf = joblib.load("models\modele_svm_lib")
+          clf = joblib.load("models/modele_svm_lib")
 
       elif classifier == 'KNN':
-          clf = joblib.load("models\modele_knn_lib")
+          clf = joblib.load("models/modele_knn_lib")
 
       # clf.fit(X_train, y_train)
 
