@@ -1,4 +1,5 @@
 # chemain acces avec terminal: cd datascientest\Supply_chain_juin23\Streamlit
+# chemain acces avec terminal: cd C:\Datascientest\Streamlit_supply_chain
 # chemain acces avec terminal: cd C:\Users\laach\OneDrive\Documents\GitHub\Supply_chain_juin23\Streamlit
 # chemain acces avec terminal: cd C:\Users\laach\OneDrive\Documents\GitHub\Streamlit_supply_chain
 
@@ -11,7 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
-from sklearn.metrics import roc_auc_score, accuracy_score, confusion_matrix
+from sklearn.metrics import roc_auc_score, accuracy_score, confusion_matrix,mean_squared_error
 from sklearn.metrics import classification_report
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import MultinomialNB
@@ -21,7 +22,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import LabelEncoder
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.cluster import KMeans
 import joblib
@@ -71,7 +72,7 @@ df_clean_2 = df_clean_2.reset_index(drop = False)
 st.image("médias/bannière_smily.png", use_column_width=True)
 
 # ajout de titre et résumé
-st.title("Projet Supply Chain - Satisfaction des clients:::")
+st.title("Projet Supply Chain - Satisfaction des clients")
 st.write(
     ":dog: Scraper, traiter et analyser les avis clients. le code source est disponible [ici](https://github.com/LAAPHA/Streamlit_supply_chain) sur GitHub. Special thanks to Datascientest :grin:"
 )
@@ -97,46 +98,26 @@ if page == pages[0] :
 #   st.write("### Introduction")
   st.markdown("<h2 style='text-align: left;'> Introduction:</h2>", unsafe_allow_html=True)
   
-  st.markdown("<p style='text-align: left;'>___La supply chain représente les étapes d'approvisionnement allant du processus productif à la distribution de la marchandise"
-              " au client.<br>  Suite à ces différentes étapes, la satisfaction client est évaluée afin de : <br> -	Étudier la qualité de la supply chain (ex : problème"
-              " de conception, livraison, prix non adapté, durabilité…).<br> -	Étudier si le produit/service correspond bien à l’attente du marché.<br>"
-              "  -	Synthétiser les feedback, améliorations des clients.<br>  -	Aider à la réponse ou à la redirection des clients insatisfaits...<br>"
+  st.markdown("<p style='text-align: left;'>La supply chain représente les étapes d'approvisionnement allant du processus productif à la distribution de la marchandise"
+              " au client.<br>  Suite à ces différentes étapes, la satisfaction client est évaluée afin de : <br> <br>"
+              "-	Étudier la qualité de la supply chain (ex : problème de conception, livraison, prix non adapté, durabilité…).<br> "
+              "-	Étudier si le produit/service correspond bien à l’attente du marché.<br> "
+              "-	Synthétiser les feedback, améliorations des clients.<br>  "
+              "-	Aider à la réponse ou à la redirection des clients insatisfaits...<br>"
               "  Pour de nombreux produits/services, la satisfaction des clients se mesure grâce aux commentaires, et avis laissés par les clients sur des sites dédiées "
               "(ex : Trustpilot).</p>", unsafe_allow_html=True)
 
   st.markdown("<h2 style='text-align: left;'> Objectifs:</h2>", unsafe_allow_html=True)
 
-  st.markdown("<p style='text-align: left;'>___L’objectif de ce projet est d’extraire de l’information de commentaires laissés par les clients.<br> Dans un premier temps,"
-              " l’objectif sera de prédire la satisfaction d’un client à partir des commentaires laissés, c'est-à-dire de prédire le nombre d'étoiles ou la note donnée à partir"
-              " des commentaires. <br>Puis dans un second temps, l’objectif sera d’extraire les propos du commentaire (problème de livraison, article défectueux...)"
-              " afin d’expliquer la note attribuée. <br> Enfin, l’objectif sera d’extraire de la réponse du fournisseur les propos du commentaire dans le but d’essayer "
+  st.markdown("<p style='text-align: left;'>L’objectif de ce projet est d’extraire de l’information de commentaires laissés par les clients.<br> Dans un premier temps,"
+              " l’objectif sera de <b>prédire la satisfaction d’un client </b>à partir des commentaires laissés, c'est-à-dire de prédire le nombre d'étoiles ou la note donnée à partir"
+              " des commentaires. <br>Puis dans un second temps, l’objectif sera <b>d’extraire les propos du commentaire</b> (problème de livraison, article défectueux...)"
+              " afin d’expliquer la note attribuée. <br> Enfin, l’objectif sera <b>d’extraire de la réponse du fournisseur les propos du commentaire</b> dans le but d’essayer "
               "de les prédire uniquement avec le commentaire afin de générer des réponses automatiques. </p>", unsafe_allow_html=True)
               
   
 
-  # about this application
-
-  with st.expander('About this app'):
-    st.markdown('**What can this app do?**')
-    st.info('This app allow users to build a machine learning (ML) model in an end-to-end workflow.'
-            ' Particularly, this encompasses data upload, data pre-processing, ML model building and post-model analysis.')
-
-    st.markdown('**How to use the app?**')
-    st.warning('To engage with the app, go to the sidebar and 1. Select a data set and 2. Adjust the model parameters by adjusting'
-              ' the various slider widgets. As a result, this would initiate the ML model building process, display the model results'
-              ' as well as allowing users to download the generated models and accompanying data.')
-
-    st.markdown('**Under the hood**')
-    st.markdown('Data sets:')
-    st.code('''- Drug solubility data set
-    ''', language='markdown')
-    
-    st.markdown('Libraries used:')
-    st.code('''- Pandas for data wrangling
-    - Scikit-learn for building a machine learning model
-    - Altair for chart creation
-    - Streamlit for user interface
-    ''', language='markdown')
+  
 
 
 ## page préparation des données
@@ -703,17 +684,44 @@ if page == pages[2] :
   # st.pyplot(fig)
 
   # st.write(fig)
-    
+
+            ###################  fin data visualization ##########################"
     
 
-#################################################################################################################
 ##################################################la page de modélisation ######################################
   
 if page == pages[3] : 
-  
-  st.markdown("<h2 style='text-align: left;'>Modélisation des modèles:</h2>", unsafe_allow_html=True)
+  # première modélisation
+  df1 = joblib.load("Models/data1_lib")
 
-  #################""
+  from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
+  from sklearn.impute import SimpleImputer
+  from sklearn.compose import ColumnTransformer
+
+  # nous stockons d'abord le nom des colonnes quantitatives
+  numeric_features = ['nombre_caractères', 'nombre_maj','nombre_car_spé','emojis_positifs_count',
+                      'emojis_negatifs_count','nombre_point_intero','nombre_point_exclam','sentiment_commentaire']
+  # nous appliquons à ces colonnes une transformation
+  numeric_transformer = StandardScaler()
+
+  # categorical_features = ['commentaire_clean']
+  categorical_features = ['commentaire_clean_pos_tag']
+  # nous appliquons à ces colonnes une OneHot
+  categorical_transformer = OneHotEncoder(handle_unknown='ignore',categories='auto')
+  # on combine toutes ces informations dans un objet de la classe ColumnTransformer
+  preprocessor = ColumnTransformer(transformers=[('num', numeric_transformer, numeric_features)])
+  # on applique les transformations sur toutes les colonnes
+  df_clean = preprocessor.fit_transform(df1)
+
+  ## affecter les variables explécatives et la variable cible
+  x1 = df_clean
+  y1 = df1["notes_bis"]
+  x_train_1, x_test_1, y_train_1, y_test_1 = train_test_split(x1, y1,test_size=0.2, random_state = 42)
+
+
+
+  #########                 deuxème modélisation                ########""
+
   ## Colonnes à supprimer
   colonnes_à_supprimer = ['categorie_bis','verified', 'nombre_caractères', 'nombre_caractères', 'nombre_maj', 'nombre_car_spé', 'emojis_positifs_count',
        'emojis_negatifs_count',  'nombre_point_intero', 'nombre_point_exclam', 'companies', 'noms', 'titre_com', 'commentaire', 'verif_reponses',
@@ -731,112 +739,255 @@ if page == pages[3] :
   encode_y = LabelEncoder()
   x = df2["commentaire_clean_pos_tag"] ## ajouter POS Tagging
   y = encode_y.fit_transform(df2["notes_bis"])
-# on sépare en apprentissage/validation
+  # on sépare en apprentissage/validation
   x_train, x_test, y_train, y_test = train_test_split(x , y ,test_size = 0.2 , random_state=42)
 
 # on transforme en matrice creuse d’occurrence des mots (on transforme x_train et on applique à x_test la transformation)
-# trans_vect = CountVectorizer()
-  trans_vect = TfidfVectorizer()
+  vect = st.sidebar.radio('Quelle vectorisation souhaitez-vous utiliser?', ('CountVectorizer', 'TfidfVectorizer'))
+  if vect == 'CountVectorizer':
+      trans_vect = CountVectorizer()
+      
+  elif vect == 'TfidfVectorizer':
+      trans_vect = TfidfVectorizer()
+   
   x_train_trans = trans_vect.fit_transform(x_train)
   x_test_trans  = trans_vect.transform(x_test)
-    
-  # (i) Dans le script Python, créer une fonction appelée prediction qui prend en argument le nom d'un classifieur et renvoie le classifieur entrainé.
 
-  def prediction(classifier):
-      if classifier == 'Naive Bayes':
-          clf = joblib.load("Models/modele_bayes_lib")
+    ########################
+  st.markdown("<h2 style='text-align: left;'>Modélisation & Algorithmes:</h2>", unsafe_allow_html=True)
+
+
+  st.image("médias/algorithmes.png", caption = 'Les différents algorithmes testés',use_column_width=True)
+
+  st.markdown("<h2 style='text-align: left;'>Résultats avec la première méthode</h2>", unsafe_allow_html=True)
+  
+  # création des onglets:
+  tab1, tab2, tab3, tab4 = st.tabs(["Informations sur le DataFrame","Ramdom Forest", "KNN", "Graphiques"])
+
+  with tab1:
+      st.write("Nombre de lignes :", df1.shape[0])
+      st.write("Nombre de colonnes :", df1.shape[1])
+      st.write("Types de données de chaque colonne :")
+      st.code(df1.dtypes)
+
+  with tab2:
+      clf = joblib.load("Models/modele_rf1_lib")
+      st.write("Matrice de confusion:\n")
+
+      st.code(confusion_matrix(y_test_1, clf.predict(x_test_1)))
+
+      st.write("Score du modèle:\n", clf.score(x_test_1, y_test_1))
+
+      st.write("Rapport de classification :")
+      report = classification_report(y_test_1, clf.predict(x_test_1), output_dict=True)
+      df_report = pd.DataFrame(report).transpose()
+
+      columns_mapping = {
+          "precision": "Précision",
+          "recall": "Rappel",
+          "f1-score": "F1-score",
+          "support": "Support"
+          }
+      df_report.rename(columns=columns_mapping, inplace=True)
+      # Afficher le DataFrame dans Streamlit
+      st.dataframe(df_report)
+  
+  with tab3:
+      clf = joblib.load("Models/modele_knn1_lib")
+
+      st.write("Matrice de confusion:\n")
+      st.code(confusion_matrix(y_test_1, clf.predict(x_test_1)))
+
+      st.write("Score du modèle:\n", clf.score(x_test_1, y_test_1))
+
+      st.write("Rapport de classification :")
+      report = classification_report(y_test_1, clf.predict(x_test_1), output_dict=True)
+      df_report = pd.DataFrame(report).transpose()
+
+      columns_mapping = {
+          "precision": "Précision",
+          "recall": "Rappel",
+          "f1-score": "F1-score",
+          "support": "Support"
+          }
+      df_report.rename(columns=columns_mapping, inplace=True)
+      # Afficher le DataFrame dans Streamlit
+      st.dataframe(df_report)
+
+  with tab4:
+      st.write(" graphiques ici")
+
+
+
+
+
+############################################################################################################################################################
+  # # (i) Dans le script Python, créer une fonction appelée prediction qui prend en argument le nom d'un classifieur et renvoie le classifieur entrainé.
+
+  # def prediction(classifier):
+  #     if classifier == 'Naive Bayes':
+  #         clf = joblib.load("Models/modele_bayes_lib")
                 
-      elif classifier == 'Gardient boosting':
-          clf = joblib.load("Models/modele_gb_lib")
+  #     elif classifier == 'Gardient boosting':
+  #         clf = joblib.load("Models/modele_gb_lib")
 
-      elif classifier == 'SVC':
-          clf = joblib.load("Models/modele_svm_lib")
+  #     elif classifier == 'SVC':
+  #         clf = joblib.load("Models/modele_svm_lib")
 
-      elif classifier == 'KNN':
-          clf = joblib.load("Models/modele_knn_lib")
+  #     elif classifier == 'KNN':
+  #         clf = joblib.load("Models/modele_knn_lib")
 
-      # clf.fit(X_train, y_train)
+  #     # clf.fit(X_train, y_train)
 
-      return clf
+  #     return clf
 
-  # Puisque les classes ne sont pas déséquilibrées, il est intéressant de regarder l'accuracy des prédictions. Copiez le code suivant dans votre script Python. Il crée une fonction qui renvoie au choix l'accuracy ou la matrice de confusion.
-  
-  def scores(clf, choice):
-      if choice == 'Accuracy':
-          return clf.score(x_test_trans,y_test)
-      elif choice == 'Confusion matrix':
-          return confusion_matrix(y_test, clf.predict(x_test_trans))
+  # def scores(clf, choice):
+  #     if choice == 'Accuracy':
+  #         return clf.score(x_test_trans,y_test)
+  #     elif choice == 'Confusion matrix':
+  #         return confusion_matrix(y_test, clf.predict(x_test_trans))
   
   
-
-  # (j) Dans le script Python, utiliser la méthode st.selectbox() pour choisir entre le classifieur RandomForest, le classifieur SVM et le classifieur LogisticRegression. Puis retourner sur l'application web Streamlit pour visualiser la "select box".
-  choix = ['Naive Bayes', 'Gardient boosting','SVC','KNN']
-  option = st.selectbox('Choix du modèle', choix)
-  st.write('Le modèle choisi est :', option)
+  # # (j) Dans le script Python, utiliser la méthode st.selectbox() pour choisir entre le classifieur RandomForest, le classifieur SVM et le classifieur LogisticRegression. Puis retourner sur l'application web Streamlit pour visualiser la "select box".
+  # choix = ['Naive Bayes', 'Gardient boosting','SVC','KNN']
+  # option = st.selectbox('Choix du modèle', choix)
+  # st.write('Le modèle choisi est :', option)
   
-  # Il ne reste plus qu'à entrainer le classifieur choisi en utilisant la fonction prediction précédemment définie et à afficher les résultats.
-  clf = prediction(option)
+  # # Il ne reste plus qu'à entrainer le classifieur choisi en utilisant la fonction prediction précédemment définie et à afficher les résultats.
+  # clf = prediction(option)
 
-  # y_pred = clf.predict(x_test_trans) # Calculate predictions
-  # st.write('Le modèle choisi est :', accuracy_score(y_test, y_pred))
+  # display = st.radio('Que souhaitez-vous montrer ?', ('Accuracy', 'Confusion matrix','Rapport'))
 
-  
-  
-  display = st.radio('Que souhaitez-vous montrer ?', ('Accuracy', 'Confusion matrix','Rapport'))
-
-  if display == 'Accuracy':
-      # clf
-      st.write(scores(clf, display))
+  # if display == 'Accuracy':
+  #     # clf
+  #     st.write(scores(clf, display))
       
-  elif display == 'Confusion matrix':
-      st.dataframe(scores(clf, display))
+  # elif display == 'Confusion matrix':
+  #     st.dataframe(scores(clf, display))
 
-  elif display == 'Rapport':
-      st.write('Le Rapport est en cours de construction...')
+  # elif display == 'Rapport':
+  #     st.write('Le Rapport est en cours de construction...')
 
-  st.write('présentation en colonnes')
+  ######################################################################################################################################################################
   
-  # col1, col2 = st.columns(2)
-  #   col1.st.scores(clf, display)
-  #   col2.st.dataframe(scores(clf, display))
-  
-
-
-  # Ajouter des onglets
-  # tabs = ["Page 1", "Page 2", "Page 3"]
-  # selected_tab = st.sidebar.radio("Sélectionnez une page", tabs)
-
-  # # Contenu des onglets
-  # if selected_tab == "Page 1":
-  #   st.write("Contenu de la page 1")
-  # elif selected_tab == "Page 2":
-  #   st.write("Contenu de la page 2")
-  # elif selected_tab == "Page 3":
-  #   st.write("Contenu de la page 3")
-
+  st.markdown("<h2 style='text-align: left;'>Résultats avec la deuxième méthode</h2>", unsafe_allow_html=True)
   # Sélection de l'onglet
   
 
-  tab1, tab2, tab3 = st.tabs(["rapport 1", "rapport 2", "rapport 3"])
+  tab0, tab1 , tab2, tab3, tab4, tab5 = st.tabs(["Informations sur le DataFrame","Naive Bayes", "Gardient boosting", "SVM","KNN","Random Forest"])
+
+  with tab0:
+      st.write("Nombre de lignes :", df2.shape[0])
+      st.write("Nombre de colonnes :", df2.shape[1])
+      st.write("Types de données de chaque colonne :")
+      st.code(df2.dtypes)
 
   with tab1:
-   st.header("rapport 1")
-   st.image("https://static.streamlit.io/examples/cat.jpg", width=200)
+  #  st.header("Rapport Naive Bayes")
+   clf = joblib.load("Models/modele_bayes_lib")
+  #  clf = joblib.load("Models/modele_rf_lib")
 
+   st.write("Matrice de confusion:\n")
+   st.code(confusion_matrix(y_test, clf.predict(x_test_trans)))
+
+   st.write("Score du modèle:\n", clf.score(x_test_trans, y_test))
+
+   st.write("Rapport de classification :")
+   report = classification_report(y_test, clf.predict(x_test_trans), output_dict=True)
+   df_report = pd.DataFrame(report).transpose()
+
+   columns_mapping = {
+      "precision": "Précision",
+      "recall": "Rappel",
+      "f1-score": "F1-score",
+      "support": "Support"
+      }
+   df_report.rename(columns=columns_mapping, inplace=True)
+   # Afficher le DataFrame dans Streamlit
+   st.dataframe(df_report)
+  
   with tab2:
-   st.header("rapport 2")
-   st.image("https://static.streamlit.io/examples/dog.jpg", width=200)
+   st.image("médias/Capture_gb.png", caption = '',use_column_width=True)
+  #  #  st.header("Rapport Gardient boosting")
+  #  clf = joblib.load("Models/modele_gb_lib")
+
+  #  st.write("Matrice de confusion:\n")
+  #  st.code(confusion_matrix(y_test, clf.predict(x_test_trans)))
+
+  #  st.write("Score du modèle:\n", clf.score(x_test_trans, y_test))
+
+  #  st.write("Rapport de classification :")
+  #  report = classification_report(y_test, clf.predict(x_test_trans), output_dict=True)
+  #  df_report = pd.DataFrame(report).transpose()
+
+  #  columns_mapping = {
+  #     "precision": "Précision",
+  #     "recall": "Rappel",
+  #     "f1-score": "F1-score",
+  #     "support": "Support"
+  #     }
+  #  df_report.rename(columns=columns_mapping, inplace=True)
+  #  # Afficher le DataFrame dans Streamlit
+  #  st.dataframe(df_report)
 
   with tab3:
-   st.header("rapport 3")
-   st.image("https://static.streamlit.io/examples/owl.jpg", width=200)
+   st.image("médias/Capture_svm.png", caption = '',use_column_width=True)
+  #  #  st.header("Rapport SVM")
+  #  clf = joblib.load("Models/modele_svm_lib")
 
-## fin modélisation
+  #  st.write("Matrice de confusion:\n")
+  #  st.code(confusion_matrix(y_test, clf.predict(x_test_trans)))
+
+  #  st.write("Score du modèle:\n", clf.score(x_test_trans, y_test))
+
+  #  st.write("Rapport de classification :")
+  #  report = classification_report(y_test, clf.predict(x_test_trans), output_dict=True)
+  #  df_report = pd.DataFrame(report).transpose()
+
+  #  columns_mapping = {
+  #     "precision": "Précision",
+  #     "recall": "Rappel",
+  #     "f1-score": "F1-score",
+  #     "support": "Support"
+  #     }
+  #  df_report.rename(columns=columns_mapping, inplace=True)
+  #  # Afficher le DataFrame dans Streamlit
+  #  st.dataframe(df_report)
+
+  with tab4:
+   st.image("médias/Capture_knn.png", caption = '',use_column_width=True)
+  #  #  st.header("Rapport KNN")
+  #  clf = joblib.load("Models/modele_knn_lib")
+
+  #  st.write("Matrice de confusion:\n")
+  #  st.code(confusion_matrix(y_test, clf.predict(x_test_trans)))
+
+  #  st.write("Score du modèle:\n", clf.score(x_test_trans, y_test))
+   
+  #  st.write("Rapport de classification :")
+  #  report = classification_report(y_test, clf.predict(x_test_trans), output_dict=True)
+  #  df_report = pd.DataFrame(report).transpose()
+
+  #  columns_mapping = {
+  #     "precision": "Précision",
+  #     "recall": "Rappel",
+  #     "f1-score": "F1-score",
+  #     "support": "Support"
+  #     }
+  #  df_report.rename(columns=columns_mapping, inplace=True)
+  #  # Afficher le DataFrame dans Streamlit
+  #  st.dataframe(df_report)
+
+  #  st.write("Rapport de classification:\n")
+  #  st.code( classification_report(y_test, clf.predict(x_test_trans)) )
+
+                                          ## fin modélisation ##
     
+  with tab5:
+      st.write("Taille de modèle très grande!!!!")
 
-
-#################################################################################################################################
-### ########################################################### Le clustering ###################################################
+############################################# Le clustering ######################################
+   
 if page == pages[4] :
   
   colonnes_à_supprimer = ['verified', 'nombre_caractères', 'nombre_caractères', 'nombre_maj', 'nombre_car_spé', 'emojis_positifs_count',
@@ -1046,10 +1197,50 @@ if page == pages[4] :
 
 
 
-############# les auteurs 
+############# les auteurs #######################
 st.sidebar.write("**Réalisé par:**")
-st.sidebar.markdown("[Mustapha LAACHIR](https://www.laapha.com)")
-st.sidebar.markdown("[Sabrina DIACQUENOD](https://www.laapha.com)")
+st.sidebar.markdown('<a style="font-size: 14px; color: red;" href="https://www.linkedin.com/in/m-laachir">Mustapha LAACHIR</a>', unsafe_allow_html=True)
+st.sidebar.markdown('<a style="font-size: 14px; color: red;" href="https://www.linkedin.com/in/sabrina-diacquenod-b33221200">Sabrina DIACQUENOD</a>', unsafe_allow_html=True)
+
+
+#### about this application ####################
+st.write("------------------------------------------------------------------------")
+
+with st.expander('About this app'):
+    st.markdown('**What can this app do?**')
+    st.info('Cette application permet de scaprer les données du web (avis clients du site Trustpilot).'
+            ' Nous faisons ce scraping pour des fins éducatives dans le cadre de notre formation.\n'
+            ' Le webscraping de masse est interdit, veuillez respecter les conditions du site internet'
+            ' Particularly, this encompasses data scraping, data pre-processing, ML model building and post-model analysis.')
+
+    st.markdown('**How to use the app?**')
+    st.warning('Pour utiliser cette application, aller dans la page "Préparation des données", puis choisir dans la liste la catégorie à scraper (nous avons volentairement autoriser que quelques catégories)'
+              ' Cliquer ensuite sur le bouton "Scraper les avis". cette opération nécessite environ 2 à 3 minutes.'
+              ' une fois fois terminé, vous verrez le résultat qui s afficher plus bas.' 
+              ' Dans la version originale, les données sont directement enregistrées dans un fichier Excel')
+    
+    st.warning('Dans la page "Data Visualization", vous pouvez regarder les graphiques issues de notre vrai jeux de données'
+              ' Ils sont fait avec les bibliothèques Seaborn et Plotly')
+    
+    st.warning('Vous pourrez ensuite voir les résultats de nos models préntrainés dans la page "Modélisation" et la page "Clusternig"')
+                  
+    st.markdown('**Under the hood**')
+    st.markdown('Data sets:')
+    st.code('''- Les datasets sont stockés dans le dossiers Datas de GitHub du projet.
+    Merci de nous faire part de vos remarques
+    Nous  signaler de potentiels buggs.
+    ''', language='markdown')
+    
+    st.markdown('Contexte:')
+    st.code('''Ce projet a été réalisé dans le cadre de notre formation de Data scientist \nréalisée au sein de l'organisme de formation Datascientest.
+    Réalisé par :
+      - M. LAACHIR 
+      - S. DIACQUENOD
+    ''', language='markdown')
+
+# image avis clients
+st.sidebar.image("médias/avis_clients.png",  caption='',  use_column_width=False, width=50 )
+
 
 
 
@@ -1179,5 +1370,3 @@ st.sidebar.markdown("[Sabrina DIACQUENOD](https://www.laapha.com)")
 #               st.write(link)
 #       else:
 #           st.warning("Veuillez saisir une URL valide.")
-
-st.image("médias/avis_clients.png",  caption='Avis clients',  use_column_width=False, width=50 )
