@@ -33,6 +33,9 @@ from bs4 import BeautifulSoup as bs
 import requests
 from wordcloud import WordCloud
 
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
+from sklearn.impute import SimpleImputer
+from sklearn.compose import ColumnTransformer
 
 # Ajouter du style CSS personnalisé
 st.markdown(
@@ -65,9 +68,16 @@ st.markdown(
 df_liste_liens = pd.read_excel("Datas/liste_finale_à_scraper.xlsx", index_col=0)
 # df_clean = pd.read_excel("Final_data_scraped_traité_traduit_ok_clean.xlsx", index_col=0)
 # df.head()
+@st.cache_data
+def importer_df_clean():
+    df_clean_2 = joblib.load("Models/data_clean_lib")
+    df_clean_2 = df_clean_2.reset_index(drop = False)
+    return df_clean_2
 
-df_clean_2 = joblib.load("Models/data_clean_lib")
-df_clean_2 = df_clean_2.reset_index(drop = False)
+@st.cache_data
+def importer_df1():
+    df1 = joblib.load("Models/data1_lib")
+    return df1
 
 st.image("médias/bannière_smily.png", use_column_width=True)
 
@@ -481,9 +491,16 @@ if page == pages[1] :
           st.warning("Veuillez saisir une URL valide.")
 
            
-          
-  
+  checkbox_state = st.checkbox("Afficher les résultats")
+  # Vérification de l'état de la case à cocher
+  if checkbox_state:
+      st.image("médias/web_scrap1.png",  caption='', use_column_width=True)
+      st.image("médias/web_scrap2.png",  caption='', use_column_width=True)
+      st.image("médias/web_scrap3.png",  caption='', use_column_width=True)
+  else:
+      st.write("")
 
+  
   st.write("------------------------------------------------------------------------")
     
   st.markdown("<h2 style='text-align: left;'>Troixième étape: Data Cleaning & Feature engineering:</h2>", unsafe_allow_html=True)
@@ -507,7 +524,7 @@ if page == pages[1] :
 ###################### page de la DataViz ###############################
 
 if page == pages[2] : 
-  
+  df_clean_2 = importer_df_clean()
   # import joblib
   # df_clean_2 = joblib.load("data_clean_")
 
@@ -537,7 +554,6 @@ if page == pages[2] :
 #   st.write("Valeurs non nulles par colonne :")
 #   st.code(df_v.notnull().sum())
   
-
 
   st.markdown("<h2 style='text-align: left;'>Data Visualization:</h2>", unsafe_allow_html=True)
 
@@ -688,19 +704,17 @@ if page == pages[2] :
             ###################  fin data visualization ##########################"
     
 
-##################################################la page de modélisation ######################################
+##################################################  la page de modélisation ######################################
   
 if page == pages[3] : 
   # première modélisation
-  df1 = joblib.load("Models/data1_lib")
-
-  from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
-  from sklearn.impute import SimpleImputer
-  from sklearn.compose import ColumnTransformer
+  df1 = importer_df1()
+  # df1 = joblib.load("Models/data1_lib")
 
   # nous stockons d'abord le nom des colonnes quantitatives
   numeric_features = ['nombre_caractères', 'nombre_maj','nombre_car_spé','emojis_positifs_count',
                       'emojis_negatifs_count','nombre_point_intero','nombre_point_exclam','sentiment_commentaire']
+  
   # nous appliquons à ces colonnes une transformation
   numeric_transformer = StandardScaler()
 
@@ -730,6 +744,8 @@ if page == pages[3] :
        'commentaire_text','commentaire_en', 'verif_traduction', 'commentaire_en_bis','cat_nombre_caractères','cat_nombre_maj','notes','sentiment_commentaire','commentaire_clean']
 
 # supprimer les colonnes inutiles
+  df_clean_2 = importer_df_clean()
+
   df2 = df_clean_2.drop(columns = colonnes_à_supprimer)
   df2 = df2.drop_duplicates()
   df2 = df2.dropna(subset = ['commentaire_clean_pos_tag'])
@@ -745,21 +761,184 @@ if page == pages[3] :
 # on transforme en matrice creuse d’occurrence des mots (on transforme x_train et on applique à x_test la transformation)
   vect = st.sidebar.radio('Quelle vectorisation souhaitez-vous utiliser?', ('CountVectorizer', 'TfidfVectorizer'))
   if vect == 'CountVectorizer':
+      
       trans_vect = CountVectorizer()
       
   elif vect == 'TfidfVectorizer':
+      
       trans_vect = TfidfVectorizer()
    
   x_train_trans = trans_vect.fit_transform(x_train)
   x_test_trans  = trans_vect.transform(x_test)
 
     ########################
+  
   st.markdown("<h2 style='text-align: left;'>Modélisation & Algorithmes:</h2>", unsafe_allow_html=True)
-
 
   st.image("médias/algorithmes.png", caption = 'Les différents algorithmes testés',use_column_width=True)
 
   st.markdown("<h2 style='text-align: left;'>Résultats avec la première méthode</h2>", unsafe_allow_html=True)
+
+  
+  ################ création des fonctions cache #################################################################
+  @st.cache_data
+  def mod_rf1_cache():
+      
+      st.write("test : avant load rf1")## àsupprimer
+      clf = joblib.load("Models/modele_rf1_lib")
+      st.write("test : après load rf1")## à supprimer
+
+      st.write("Matrice de confusion:\n")
+
+      st.code(confusion_matrix(y_test_1, clf.predict(x_test_1)))
+
+      st.write("Score du modèle:\n", clf.score(x_test_1, y_test_1))
+
+      st.write("Rapport de classification :")
+      report = classification_report(y_test_1, clf.predict(x_test_1), output_dict=True)
+      df_report = pd.DataFrame(report).transpose()
+
+      columns_mapping = {
+          "precision": "Précision",
+          "recall": "Rappel",
+          "f1-score": "F1-score",
+          "support": "Support"
+          }
+      df_report.rename(columns=columns_mapping, inplace=True)
+      # Afficher le DataFrame dans Streamlit
+      st.dataframe(df_report)
+      return
+
+  @st.cache_data
+  def mod_knn1_cache():
+      st.write("test : avant load knn1")## àsupprimer
+      clf = joblib.load("Models/modele_knn1_lib")
+      st.write("test : avant load knn11")## àsupprimer
+      st.write("Matrice de confusion:\n")
+      st.code(confusion_matrix(y_test_1, clf.predict(x_test_1)))
+
+      st.write("Score du modèle:\n", clf.score(x_test_1, y_test_1))
+
+      st.write("Rapport de classification :")
+      report = classification_report(y_test_1, clf.predict(x_test_1), output_dict=True)
+      df_report = pd.DataFrame(report).transpose()
+
+      columns_mapping = {
+          "precision": "Précision",
+          "recall": "Rappel",
+          "f1-score": "F1-score",
+          "support": "Support"
+          }
+      df_report.rename(columns=columns_mapping, inplace=True)
+      # Afficher le DataFrame dans Streamlit
+      st.dataframe(df_report)
+      return
+  
+  @st.cache_data
+  def mod_bayes_cache():
+    #  st.header("Rapport Naive Bayes")
+      clf = joblib.load("Models/modele_bayes_lib")
+      #  clf = joblib.load("Models/modele_rf_lib")
+
+      st.write("Matrice de confusion:\n")
+      st.code(confusion_matrix(y_test, clf.predict(x_test_trans)))
+
+      st.write("Score du modèle:\n", clf.score(x_test_trans, y_test))
+
+      st.write("Rapport de classification :")
+      report = classification_report(y_test, clf.predict(x_test_trans), output_dict=True)
+      df_report = pd.DataFrame(report).transpose()
+
+      columns_mapping = {
+          "precision": "Précision",
+          "recall": "Rappel",
+          "f1-score": "F1-score",
+          "support": "Support"
+          }
+      df_report.rename(columns=columns_mapping, inplace=True)
+      # Afficher le DataFrame dans Streamlit
+      st.dataframe(df_report)
+      return
+  
+  @st.cache_data
+  def mod_gb_cache():
+      #  st.header("Rapport Gardient boosting")
+      clf = joblib.load("Models/modele_gb_lib")
+
+      st.write("Matrice de confusion:\n")
+      st.code(confusion_matrix(y_test, clf.predict(x_test_trans)))
+
+      st.write("Score du modèle:\n", clf.score(x_test_trans, y_test))
+
+      st.write("Rapport de classification :")
+      report = classification_report(y_test, clf.predict(x_test_trans), output_dict=True)
+      df_report = pd.DataFrame(report).transpose()
+
+      columns_mapping = {
+          "precision": "Précision",
+          "recall": "Rappel",
+          "f1-score": "F1-score",
+          "support": "Support"
+          }
+      df_report.rename(columns=columns_mapping, inplace=True)
+      # Afficher le DataFrame dans Streamlit
+      st.dataframe(df_report)
+      return
+
+  @st.cache_data
+  def mod_svm_cache():
+    #  st.header("Rapport SVM")
+      clf = joblib.load("Models/modele_svm_lib")
+
+      st.write("Matrice de confusion:\n")
+      st.code(confusion_matrix(y_test, clf.predict(x_test_trans)))
+
+      st.write("Score du modèle:\n", clf.score(x_test_trans, y_test))
+
+      st.write("Rapport de classification :")
+      report = classification_report(y_test, clf.predict(x_test_trans), output_dict=True)
+      df_report = pd.DataFrame(report).transpose()
+
+      columns_mapping = {
+          "precision": "Précision",
+          "recall": "Rappel",
+          "f1-score": "F1-score",
+          "support": "Support"
+          }
+      df_report.rename(columns=columns_mapping, inplace=True)
+      # Afficher le DataFrame dans Streamlit
+      st.dataframe(df_report)
+      return
+
+  @st.cache_data
+  def mod_knn_cache():   
+      #  st.header("Rapport KNN")
+      clf = joblib.load("Models/modele_knn_lib")
+
+      st.write("Matrice de confusion:\n")
+      st.code(confusion_matrix(y_test, clf.predict(x_test_trans)))
+
+      st.write("Score du modèle:\n", clf.score(x_test_trans, y_test))
+      
+      st.write("Rapport de classification :")
+      report = classification_report(y_test, clf.predict(x_test_trans), output_dict=True)
+      df_report = pd.DataFrame(report).transpose()
+
+      columns_mapping = {
+          "precision": "Précision",
+          "recall": "Rappel",
+          "f1-score": "F1-score",
+          "support": "Support"
+          }
+      df_report.rename(columns=columns_mapping, inplace=True)
+      # Afficher le DataFrame dans Streamlit
+      st.dataframe(df_report)
+
+      st.write("Rapport de classification:\n")
+      st.code( classification_report(y_test, clf.predict(x_test_trans)) )
+      return
+
+####################################################################################################################
   
   # création des onglets:
   tab1, tab2, tab3, tab4 = st.tabs(["Informations sur le DataFrame","Ramdom Forest", "KNN", "Graphiques"])
@@ -771,53 +950,15 @@ if page == pages[3] :
       st.code(df1.dtypes)
 
   with tab2:
-      clf = joblib.load("Models/modele_rf1_lib")
-      st.write("Matrice de confusion:\n")
+      mod_rf1_cache()
 
-      st.code(confusion_matrix(y_test_1, clf.predict(x_test_1)))
-
-      st.write("Score du modèle:\n", clf.score(x_test_1, y_test_1))
-
-      st.write("Rapport de classification :")
-      report = classification_report(y_test_1, clf.predict(x_test_1), output_dict=True)
-      df_report = pd.DataFrame(report).transpose()
-
-      columns_mapping = {
-          "precision": "Précision",
-          "recall": "Rappel",
-          "f1-score": "F1-score",
-          "support": "Support"
-          }
-      df_report.rename(columns=columns_mapping, inplace=True)
-      # Afficher le DataFrame dans Streamlit
-      st.dataframe(df_report)
-  
+        
   with tab3:
-      clf = joblib.load("Models/modele_knn1_lib")
+      mod_knn1_cache()
 
-      st.write("Matrice de confusion:\n")
-      st.code(confusion_matrix(y_test_1, clf.predict(x_test_1)))
-
-      st.write("Score du modèle:\n", clf.score(x_test_1, y_test_1))
-
-      st.write("Rapport de classification :")
-      report = classification_report(y_test_1, clf.predict(x_test_1), output_dict=True)
-      df_report = pd.DataFrame(report).transpose()
-
-      columns_mapping = {
-          "precision": "Précision",
-          "recall": "Rappel",
-          "f1-score": "F1-score",
-          "support": "Support"
-          }
-      df_report.rename(columns=columns_mapping, inplace=True)
-      # Afficher le DataFrame dans Streamlit
-      st.dataframe(df_report)
-
+      
   with tab4:
       st.write(" graphiques ici")
-
-
 
 
 
@@ -868,7 +1009,8 @@ if page == pages[3] :
   # elif display == 'Rapport':
   #     st.write('Le Rapport est en cours de construction...')
 
-  ######################################################################################################################################################################
+
+  ###################################################   deuxième modélisation  #####################################################################
   
   st.markdown("<h2 style='text-align: left;'>Résultats avec la deuxième méthode</h2>", unsafe_allow_html=True)
   # Sélection de l'onglet
@@ -883,104 +1025,25 @@ if page == pages[3] :
       st.code(df2.dtypes)
 
   with tab1:
+    mod_bayes_cache()
   #  st.header("Rapport Naive Bayes")
-   clf = joblib.load("Models/modele_bayes_lib")
-  #  clf = joblib.load("Models/modele_rf_lib")
-
-   st.write("Matrice de confusion:\n")
-   st.code(confusion_matrix(y_test, clf.predict(x_test_trans)))
-
-   st.write("Score du modèle:\n", clf.score(x_test_trans, y_test))
-
-   st.write("Rapport de classification :")
-   report = classification_report(y_test, clf.predict(x_test_trans), output_dict=True)
-   df_report = pd.DataFrame(report).transpose()
-
-   columns_mapping = {
-      "precision": "Précision",
-      "recall": "Rappel",
-      "f1-score": "F1-score",
-      "support": "Support"
-      }
-   df_report.rename(columns=columns_mapping, inplace=True)
-   # Afficher le DataFrame dans Streamlit
-   st.dataframe(df_report)
-  
+    
   with tab2:
-   st.image("médias/Capture_gb.png", caption = '',use_column_width=True)
+    mod_gb_cache()
+  #  st.image("médias/Capture_gb.png", caption = '',use_column_width=True)
   #  #  st.header("Rapport Gardient boosting")
-  #  clf = joblib.load("Models/modele_gb_lib")
-
-  #  st.write("Matrice de confusion:\n")
-  #  st.code(confusion_matrix(y_test, clf.predict(x_test_trans)))
-
-  #  st.write("Score du modèle:\n", clf.score(x_test_trans, y_test))
-
-  #  st.write("Rapport de classification :")
-  #  report = classification_report(y_test, clf.predict(x_test_trans), output_dict=True)
-  #  df_report = pd.DataFrame(report).transpose()
-
-  #  columns_mapping = {
-  #     "precision": "Précision",
-  #     "recall": "Rappel",
-  #     "f1-score": "F1-score",
-  #     "support": "Support"
-  #     }
-  #  df_report.rename(columns=columns_mapping, inplace=True)
-  #  # Afficher le DataFrame dans Streamlit
-  #  st.dataframe(df_report)
-
+  
   with tab3:
-   st.image("médias/Capture_svm.png", caption = '',use_column_width=True)
+    mod_svm_cache()
+    # st.image("médias/Capture_svm.png", caption = '',use_column_width=True)
   #  #  st.header("Rapport SVM")
-  #  clf = joblib.load("Models/modele_svm_lib")
-
-  #  st.write("Matrice de confusion:\n")
-  #  st.code(confusion_matrix(y_test, clf.predict(x_test_trans)))
-
-  #  st.write("Score du modèle:\n", clf.score(x_test_trans, y_test))
-
-  #  st.write("Rapport de classification :")
-  #  report = classification_report(y_test, clf.predict(x_test_trans), output_dict=True)
-  #  df_report = pd.DataFrame(report).transpose()
-
-  #  columns_mapping = {
-  #     "precision": "Précision",
-  #     "recall": "Rappel",
-  #     "f1-score": "F1-score",
-  #     "support": "Support"
-  #     }
-  #  df_report.rename(columns=columns_mapping, inplace=True)
-  #  # Afficher le DataFrame dans Streamlit
-  #  st.dataframe(df_report)
-
+  
   with tab4:
-   st.image("médias/Capture_knn.png", caption = '',use_column_width=True)
+    mod_knn_cache()
+
+  #  st.image("médias/Capture_knn.png", caption = '',use_column_width=True)
   #  #  st.header("Rapport KNN")
-  #  clf = joblib.load("Models/modele_knn_lib")
-
-  #  st.write("Matrice de confusion:\n")
-  #  st.code(confusion_matrix(y_test, clf.predict(x_test_trans)))
-
-  #  st.write("Score du modèle:\n", clf.score(x_test_trans, y_test))
-   
-  #  st.write("Rapport de classification :")
-  #  report = classification_report(y_test, clf.predict(x_test_trans), output_dict=True)
-  #  df_report = pd.DataFrame(report).transpose()
-
-  #  columns_mapping = {
-  #     "precision": "Précision",
-  #     "recall": "Rappel",
-  #     "f1-score": "F1-score",
-  #     "support": "Support"
-  #     }
-  #  df_report.rename(columns=columns_mapping, inplace=True)
-  #  # Afficher le DataFrame dans Streamlit
-  #  st.dataframe(df_report)
-
-  #  st.write("Rapport de classification:\n")
-  #  st.code( classification_report(y_test, clf.predict(x_test_trans)) )
-
+  
                                           ## fin modélisation ##
     
   with tab5:
@@ -989,7 +1052,9 @@ if page == pages[3] :
 ############################################# Le clustering ######################################
    
 if page == pages[4] :
-  
+
+  df_clean_2 = importer_df_clean()
+
   colonnes_à_supprimer = ['verified', 'nombre_caractères', 'nombre_caractères', 'nombre_maj', 'nombre_car_spé', 'emojis_positifs_count',
        'emojis_negatifs_count',  'nombre_point_intero', 'nombre_point_exclam', 'companies', 'noms', 'titre_com', 'commentaire', 'verif_reponses',
        'reponses',  'date_experience', 'date_commentaire', 'site', 'nombre_pages', 'date_scrap',  'année_experience', 'langue',
@@ -1042,13 +1107,17 @@ if page == pages[4] :
   tfidf_vectorizer = TfidfVectorizer(stop_words='english')
   tfidf_matrix = tfidf_vectorizer.fit_transform(df3['commentaire_clean'])
  
-  sse = []
-  for k in range(2, 8):
-      kmeans = KMeans(n_clusters=k, random_state=42)
-      kmeans.fit(tfidf_matrix)
-      sse.append(kmeans.inertia_)
-      
+  @ st.cache_data
+  def sse_cache():
+      sse = []
+      for k in range(2, 8):
+          kmeans = KMeans(n_clusters=k, random_state=42)
+          kmeans.fit(tfidf_matrix)
+          sse.append(kmeans.inertia_)
+      return sse
   # sse = joblib.load("Models/modele_clusters_lib")
+
+  sse = sse_cache()
 
   st.markdown("<h3 style='text-align: left;'>Le nombre de clusters optimal:</h3>", unsafe_allow_html=True)
 
@@ -1116,34 +1185,10 @@ if page == pages[4] :
   st.markdown("<p style='text-align: left;'>Après avoir fait ces nuages de points,"
               " nous allons essayer de trouver une logique qui permettra de définir la spécificité de chacun des clusters </p>", unsafe_allow_html=True)
 
-  # for tabss in liste_tab:
-  #   tabss = st.tabs(tabss)
-  #   st.header(tabss)
-  #   st.image("https://static.streamlit.io/examples/cat.jpg", width=200)
-
-
-  # Sélection de l'onglet
-  
-  # liste_tab = [int(valeur) for valeur in liste_tab]
-
-  # tab_cluster = st.radio("Choisissez les notes à analyser:", liste_tab)
-  # st.write(tab_cluster)
-
-  # st.header("Cluster: ")
-  # df3_1 = df3[df3['cluster'] == tab_cluster]
-  # # Exemple pour le cluster 0
-  # text_cluster_1 = ' '.join(df3_1['commentaire_clean'])
-  # # Générer le nuage de mots
-  # wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text_cluster_1)
-  # # Afficher le nuage de mots
-  # fig , ax = plt.subplots(figsize=(10,6))
-  # plt.imshow(wordcloud, interpolation='bilinear')
-  # plt.axis('off')
-  # plt.title('Nuage de mots pour le cluster: ', tab_cluster)
-  # st.pyplot(fig)
-  
+   
   
   tab1, tab2, tab3 = st.tabs(["Cluster 1", "Cluster 2", "Cluster 3"])
+
   with tab1:
     st.header("Cluster 01")
     df3_1 = df3[df3['cluster'] == 1]
@@ -1193,17 +1238,14 @@ if page == pages[4] :
   # st.dataframe(df3.head(10))
   
 
-
-
-
-
 ############# les auteurs #######################
 st.sidebar.write("**Réalisé par:**")
 st.sidebar.markdown('<a style="font-size: 14px; color: red;" href="https://www.linkedin.com/in/m-laachir">Mustapha LAACHIR</a>', unsafe_allow_html=True)
 st.sidebar.markdown('<a style="font-size: 14px; color: red;" href="https://www.linkedin.com/in/sabrina-diacquenod-b33221200">Sabrina DIACQUENOD</a>', unsafe_allow_html=True)
 
 
-#### about this application ####################
+######################################"""" about this application ####################
+
 st.write("------------------------------------------------------------------------")
 
 with st.expander('About this app'):
