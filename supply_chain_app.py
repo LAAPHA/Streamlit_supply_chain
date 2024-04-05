@@ -784,9 +784,9 @@ if page == pages[3] :
   @st.cache_data
   def mod_rf1_cache():
       
-      st.write("test : avant load rf1")## àsupprimer
+      # st.write("test : avant load rf1")## àsupprimer
       clf = joblib.load("Models/modele_rf1_lib")
-      st.write("test : après load rf1")## à supprimer
+      # st.write("test : après load rf1")## à supprimer
 
       st.write("Matrice de confusion:\n")
 
@@ -811,9 +811,9 @@ if page == pages[3] :
 
   @st.cache_data
   def mod_knn1_cache():
-      st.write("test : avant load knn1")## àsupprimer
+      # st.write("test : avant load knn1")## àsupprimer
       clf = joblib.load("Models/modele_knn1_lib")
-      st.write("test : avant load knn11")## àsupprimer
+      # st.write("test : avant load knn11")## àsupprimer
       st.write("Matrice de confusion:\n")
       st.code(confusion_matrix(y_test_1, clf.predict(x_test_1)))
 
@@ -938,7 +938,7 @@ if page == pages[3] :
       st.code( classification_report(y_test, clf.predict(x_test_trans)) )
       return
 
-####################################################################################################################
+###################################################################################################################
   
   # création des onglets:
   tab1, tab2, tab3, tab4 = st.tabs(["Informations sur le DataFrame","Ramdom Forest", "KNN", "Graphiques"])
@@ -1045,9 +1045,105 @@ if page == pages[3] :
   #  #  st.header("Rapport KNN")
   
                                           ## fin modélisation ##
-    
+  
   with tab5:
       st.write("Taille de modèle très grande!!!!")
+  
+  checkbox_state = st.checkbox("Afficher les résultats")
+  # Vérification de l'état de la case à cocher
+  if checkbox_state:
+      st.image("médias/comparaison_algo.png", caption = '',use_column_width=True)   
+  else:
+      st.write("")
+  
+  st.write("------------------------------")
+  
+  # checkbox_state2 = st.checkbox("Faire une simulation:")
+
+  # if st.button("Effacer"):
+  aviss = st.text_input("Entrez un commentaire: ","", key = "AVISS")
+
+  ###############
+  import nltk
+  from nltk import word_tokenize, pos_tag, sent_tokenize
+  def POStagging(commentt):  
+      text = []
+      # Split the tweet on sentence.
+      sentences = sent_tokenize(commentt)
+      # For each sentence
+      for s in sentences:
+          # Tokenize the sentence
+          wordsList = nltk.word_tokenize(s)
+          # Find the right token
+          tagged = nltk.pos_tag(wordsList)
+          # Convert the list of (token, tag) to token_tag and convert to str
+          tagged = ' '.join(map(lambda X: '_'.join(X), tagged))
+          text.append(tagged)
+      return ' '.join(text)
+
+  ######################
+  # on crée une fonction de filtre qui affiche un message
+  def commentaire_pred_nb (commentaire) :
+    arr_mess=np.array([commentaire])
+    result=encode_y.inverse_transform(pipe_text_nb.predict(arr_mess))[0]
+    return result
+  
+  def commentaire_pred_svm (commentaire) :
+      arr_mess=np.array([commentaire])
+      result=encode_y.inverse_transform(pipe_text_svm.predict(arr_mess))[0]
+      # print("La note predite avec SVM:", result)
+      return result
+
+  def commentaire_pred_gb (commentaire) :
+      arr_mess=np.array([commentaire])
+      result=encode_y.inverse_transform(pipe_text_gb.predict(arr_mess))[0]
+      return result
+
+  def commentaire_pred_rf (commentaire) :
+      arr_mess=np.array([commentaire])
+      result=encode_y.inverse_transform(pipe_text_rf.predict(arr_mess))[0]
+      return result
+
+  def commentaire_pred_knn (commentaire) :
+      arr_mess=np.array([commentaire])
+      result=encode_y.inverse_transform(pipe_text_knn.predict(arr_mess))[0]
+      return result
+
+  ######################
+
+  pipe_text_nb = joblib.load("Models/pipe_bayes_lib")
+  pipe_text_svm = joblib.load("Models/pipe_svm_lib")
+  pipe_text_gb = joblib.load("Models/pipe_gb_lib")
+  pipe_text_rf = joblib.load("Models/pipe_rf_lib")
+  pipe_text_knn = joblib.load("Models/pipe_knn_lib")
+
+  if st.button('Actualiser'):
+      # pass
+      st.write("prédiction pour l'avis'::--->" , aviss)
+      # st.write("prédiction pour l'avis POStag'::--->" ,POStagging( aviss))
+      st.write("modele nb:",commentaire_pred_nb(POStagging(aviss)))
+      st.write("modele svm:",commentaire_pred_svm(POStagging(aviss)))
+      st.write("modele gb:",commentaire_pred_gb(POStagging(aviss)))
+      st.write("modele rf:",commentaire_pred_rf(POStagging(aviss)))
+      st.write("modele knn:",commentaire_pred_knn(POStagging(aviss)))
+      
+  
+  
+  # # else:
+  #     liste_com = ["very good item, I like it",
+  #            "very happy good item",
+  #            "very bad item, I don't like it",
+  #            "place order pay via august march still hear back company",
+  #            "good bad item, happy"]
+  #     # liste_com.append(aviss)
+
+  #     for comm in liste_com:
+  #       st.write("prédiction pour l'avis'::--->" , comm)
+  #       st.write("modele nb:",commentaire_pred_nb(POStagging(comm)))
+  #       st.write("modele svm:",commentaire_pred_svm(POStagging(comm)))
+  #       st.write("modele gb:",commentaire_pred_gb(POStagging(comm)))
+  #       st.write("modele rf:",commentaire_pred_rf(POStagging(comm)))
+  #       st.write("modele knn:",commentaire_pred_knn(POStagging(comm)))
 
 ############################################# Le clustering ######################################
    
