@@ -12,3 +12,4 @@ requests
 wordcloud
 openpyxl
 lxml
+scipy
