@@ -110,10 +110,10 @@ if page == pages[0] :
   
   st.markdown("<p style='text-align: left;'>La supply chain représente les étapes d'approvisionnement allant du processus productif à la distribution de la marchandise"
               " au client.<br>  Suite à ces différentes étapes, la satisfaction client est évaluée afin de : <br> <br>"
-              "-	Étudier la qualité de la supply chain (ex : problème de conception, livraison, prix non adapté, durabilité…).<br> "
-              "-	Étudier si le produit/service correspond bien à l’attente du marché.<br> "
-              "-	Synthétiser les feedback, améliorations des clients.<br>  "
-              "-	Aider à la réponse ou à la redirection des clients insatisfaits...<br>"
+              "-	<b>Étudier la qualité de la supply chain (ex : problème de conception, livraison, prix non adapté, durabilité…).<b><br> "
+              "-	<b>Étudier si le produit/service correspond bien à l’attente du marché.<b><br> "
+              "-	<b>Synthétiser les feedback, améliorations des clients.<b><br>  "
+              "-	<b>Aider à la réponse ou à la redirection des clients insatisfaits...<b><br>"
               "  Pour de nombreux produits/services, la satisfaction des clients se mesure grâce aux commentaires, et avis laissés par les clients sur des sites dédiées "
               "(ex : Trustpilot).</p>", unsafe_allow_html=True)
 
@@ -783,12 +783,11 @@ if page == pages[3] :
   ################ création des fonctions cache #################################################################
   @st.cache_data
   def mod_rf1_cache():
-      
+      st.write("Matrice de confusion:\n")
+
       # st.write("test : avant load rf1")## àsupprimer
       clf = joblib.load("Models/modele_rf1_lib")
       # st.write("test : après load rf1")## à supprimer
-
-      st.write("Matrice de confusion:\n")
 
       st.code(confusion_matrix(y_test_1, clf.predict(x_test_1)))
 
@@ -811,10 +810,12 @@ if page == pages[3] :
 
   @st.cache_data
   def mod_knn1_cache():
+      st.write("Matrice de confusion:\n")
+
       # st.write("test : avant load knn1")## àsupprimer
       clf = joblib.load("Models/modele_knn1_lib")
       # st.write("test : avant load knn11")## àsupprimer
-      st.write("Matrice de confusion:\n")
+      
       st.code(confusion_matrix(y_test_1, clf.predict(x_test_1)))
 
       st.write("Score du modèle:\n", clf.score(x_test_1, y_test_1))
@@ -836,11 +837,12 @@ if page == pages[3] :
   
   @st.cache_data
   def mod_bayes_cache():
+      st.write("Matrice de confusion:\n")
+
     #  st.header("Rapport Naive Bayes")
       clf = joblib.load("Models/modele_bayes_lib")
       #  clf = joblib.load("Models/modele_rf_lib")
 
-      st.write("Matrice de confusion:\n")
       st.code(confusion_matrix(y_test, clf.predict(x_test_trans)))
 
       st.write("Score du modèle:\n", clf.score(x_test_trans, y_test))
@@ -862,10 +864,11 @@ if page == pages[3] :
   
   @st.cache_data
   def mod_gb_cache():
+      st.write("Matrice de confusion:\n")
+
       #  st.header("Rapport Gardient boosting")
       clf = joblib.load("Models/modele_gb_lib")
 
-      st.write("Matrice de confusion:\n")
       st.code(confusion_matrix(y_test, clf.predict(x_test_trans)))
 
       st.write("Score du modèle:\n", clf.score(x_test_trans, y_test))
@@ -887,10 +890,11 @@ if page == pages[3] :
 
   @st.cache_data
   def mod_svm_cache():
+      st.write("Matrice de confusion:\n")
+
     #  st.header("Rapport SVM")
       clf = joblib.load("Models/modele_svm_lib")
 
-      st.write("Matrice de confusion:\n")
       st.code(confusion_matrix(y_test, clf.predict(x_test_trans)))
 
       st.write("Score du modèle:\n", clf.score(x_test_trans, y_test))
@@ -911,11 +915,13 @@ if page == pages[3] :
       return
 
   @st.cache_data
-  def mod_knn_cache():   
+  def mod_knn_cache():
+      st.write("Matrice de confusion:\n")
+
       #  st.header("Rapport KNN")
       clf = joblib.load("Models/modele_knn_lib")
 
-      st.write("Matrice de confusion:\n")
+      
       st.code(confusion_matrix(y_test, clf.predict(x_test_trans)))
 
       st.write("Score du modèle:\n", clf.score(x_test_trans, y_test))
@@ -941,7 +947,7 @@ if page == pages[3] :
 ###################################################################################################################
   
   # création des onglets:
-  tab1, tab2, tab3, tab4 = st.tabs(["Informations sur le DataFrame","Ramdom Forest", "KNN", "Graphiques"])
+  tab1, tab2, tab3, tab4 = st.tabs(["Informations sur le DataFrame","KNN", "Ramdom Forest", "Graphiques"])
 
   with tab1:
       st.write("Nombre de lignes :", df1.shape[0])
@@ -950,15 +956,22 @@ if page == pages[3] :
       st.code(df1.dtypes)
 
   with tab2:
-      mod_rf1_cache()
-
+      
+      # st.image("médias/Capture_knn1.png", caption = '',use_column_width=True)
+      mod_knn1_cache()
         
   with tab3:
-      mod_knn1_cache()
+      
+      st.image("médias/Capture_rf1.png", caption = '',use_column_width=True)
+      # mod_rf1_cache()
 
       
   with tab4:
-      st.write(" graphiques ici")
+      st.write("La courbe Roc")
+      
+      st.image("médias/courbe_roc.png", caption = '',use_column_width=True)
+
+      
 
 
 
@@ -1016,7 +1029,7 @@ if page == pages[3] :
   # Sélection de l'onglet
   
 
-  tab0, tab1 , tab2, tab3, tab4, tab5 = st.tabs(["Informations sur le DataFrame","Naive Bayes", "Gardient boosting", "SVM","KNN","Random Forest"])
+  tab0, tab1 , tab2, tab3, tab4, tab5 = st.tabs(["Informations sur le DataFrame","Naive Bayes", "Gardient boosting", "SVM","KNN","Graphiques"])
 
   with tab0:
       st.write("Nombre de lignes :", df2.shape[0])
@@ -1047,17 +1060,20 @@ if page == pages[3] :
                                           ## fin modélisation ##
   
   with tab5:
-      st.write("Taille de modèle très grande!!!!")
-  
-  checkbox_state = st.checkbox("Afficher les résultats")
-  # Vérification de l'état de la case à cocher
-  if checkbox_state:
-      st.image("médias/comparaison_algo.png", caption = '',use_column_width=True)   
-  else:
-      st.write("")
+      st.write("Comparaison des modèles:")
+      st.image("médias/comparaison_algo.png", caption = '',use_column_width=True)
+
+  # checkbox_state = st.checkbox("Afficher les résultats")
+  # # Vérification de l'état de la case à cocher
+  # if checkbox_state:
+      
+  #     st.image("médias/comparaison_algo.png", caption = '',use_column_width=True)
+
+  # else:
+  #     st.write("")
   
   st.write("------------------------------")
-  
+  st.markdown("<h2 style='text-align: left;'>Démonstration avec des pipelines</h2>", unsafe_allow_html=True)
   # checkbox_state2 = st.checkbox("Faire une simulation:")
 
   # if st.button("Effacer"):
