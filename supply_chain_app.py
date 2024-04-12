@@ -94,10 +94,11 @@ st.sidebar.title("Sommaire")
 # pages=["Introduction", "Préparation des données", "Data Visualization", "Modélisation", "Machine Learning", "divers"]
 pages=["Introduction", "Préparation des données", "Data Visualization", "Modélisation", "Clustering"]
 
-page = st.sidebar.radio("Aller vers", pages)
+page = st.sidebar.radio("Aller vers:", pages)
+#endregion
 
+#region page introduction et présentation de projet
 
-## page introduction et présentation de projet
 if page == pages[0] : 
   # Image
   st.image("médias/avis_datascientest.png",  caption='Avis pour Datascientest en mars 2024. source: Trustpilot', use_column_width=True)
@@ -935,13 +936,13 @@ if page == pages[3] :
           "recall": "Rappel",
           "f1-score": "F1-score",
           "support": "Support"
-          }
+          }      
       df_report.rename(columns=columns_mapping, inplace=True)
       # Afficher le DataFrame dans Streamlit
       st.dataframe(df_report)
 
-      st.write("Rapport de classification:\n")
-      st.code( classification_report(y_test, clf.predict(x_test_trans)) )
+      # st.write("Rapport de classification:\n")
+      # st.code( classification_report(y_test, clf.predict(x_test_trans)) )
       return
 
 ###################################################################################################################
