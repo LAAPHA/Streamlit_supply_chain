@@ -13,3 +13,4 @@ wordcloud
 openpyxl
 lxml
 scipy
+nltk
