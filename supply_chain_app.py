@@ -4,7 +4,8 @@
 # chemain acces avec terminal: cd C:\Users\laach\OneDrive\Documents\GitHub\Streamlit_supply_chain
 
 # st.set_page_config(layout="wide", page_title="Image Background Remover")
-# import des modèles
+
+#region Importation des bibliothèques
 
 import streamlit as st
 import pandas as pd
@@ -97,7 +98,7 @@ pages=["Introduction", "Préparation des données", "Data Visualization", "Modé
 page = st.sidebar.radio("Aller vers:", pages)
 #endregion
 
-#region page introduction et présentation de projet
+#region Introduction et présentation de projet
 
 if page == pages[0] : 
   # Image
@@ -125,13 +126,9 @@ if page == pages[0] :
               " des commentaires. <br>Puis dans un second temps, l’objectif sera <b>d’extraire les propos du commentaire</b> (problème de livraison, article défectueux...)"
               " afin d’expliquer la note attribuée. <br> Enfin, l’objectif sera <b>d’extraire de la réponse du fournisseur les propos du commentaire</b> dans le but d’essayer "
               "de les prédire uniquement avec le commentaire afin de générer des réponses automatiques. </p>", unsafe_allow_html=True)
-              
-  
+ 
 
-  
-
-
-## page préparation des données
+#region page préparation des données
 if page == pages[1] : 
   
   st.markdown("<h1 style='text-align: center;'> Webscraping: Préparation et ciblage des données à scraper </h1>", unsafe_allow_html=True)
@@ -277,7 +274,7 @@ if page == pages[1] :
           st.pyplot(f)
           ############### fin webscraping de la liste des liens #################################################
           
-
+          #region webscraping tous liens
 
           ###################### debut de webscraping: de tous les liens-------------------------------------------------
 
@@ -339,7 +336,8 @@ if page == pages[1] :
                       page = requests.get(lien, verify = False)
                       soup = bs(page.content, "lxml")
                   except:
-                      st.write(f"Une exception s'est produite pour {lien_c}: {e}")
+                      # st.write(f"Une exception s'est produite pour {lien_c}: {e}")
+                      st.write(f"Une exception s'est produite pour {lien_c}:")
                       # continue
 
                   # Sélectionner la partie de la page qui contient les numéros de page
@@ -522,7 +520,7 @@ if page == pages[1] :
   st.image("médias/cat_notes.png",  caption='Regroupement des notes',  use_column_width=True, width=200 )
 
 
-###################### page de la DataViz ###############################
+#region page de la DataViz
 
 if page == pages[2] : 
   df_clean_2 = importer_df_clean()
@@ -704,7 +702,7 @@ if page == pages[2] :
 
             ###################  fin data visualization ##########################"
     
-
+#region  Modélisation
 ##################################################  la page de modélisation ######################################
   
 if page == pages[3] : 
@@ -780,7 +778,7 @@ if page == pages[3] :
 
   st.markdown("<h2 style='text-align: left;'>Résultats avec la première méthode</h2>", unsafe_allow_html=True)
 
-  
+  #region  Fonctions caches
   ################ création des fonctions cache #################################################################
   @st.cache_data
   def mod_rf1_cache():
@@ -946,7 +944,8 @@ if page == pages[3] :
       return
 
 ###################################################################################################################
-  
+  #region Méthode 1
+
   # création des onglets:
   tab1, tab2, tab3, tab4 = st.tabs(["Informations sur le DataFrame","KNN", "Ramdom Forest", "Graphiques"])
 
@@ -957,23 +956,21 @@ if page == pages[3] :
       st.code(df1.dtypes)
 
   with tab2:
-      
-      # st.image("médias/Capture_knn1.png", caption = '',use_column_width=True)
+    try:
       mod_knn1_cache()
-        
-  with tab3:
-      
-      st.image("médias/Capture_rf1.png", caption = '',use_column_width=True)
-      # mod_rf1_cache()
+    except:
+      st.image("médias/Capture_knn1.png", caption = '',use_column_width=True)
 
-      
+  with tab3:
+    try:
+      mod_rf1_cache()
+    except:
+      st.image("médias/Capture_rf1.png", caption = '',use_column_width=True)
+
   with tab4:
       st.write("La courbe Roc")
       
       st.image("médias/courbe_roc.png", caption = '',use_column_width=True)
-
-      
-
 
 
 ############################################################################################################################################################
@@ -1025,7 +1022,7 @@ if page == pages[3] :
 
 
   ###################################################   deuxième modélisation  #####################################################################
-  
+   #region Méthode 2
   st.markdown("<h2 style='text-align: left;'>Résultats avec la deuxième méthode</h2>", unsafe_allow_html=True)
   # Sélection de l'onglet
   
@@ -1039,28 +1036,37 @@ if page == pages[3] :
       st.code(df2.dtypes)
 
   with tab1:
-    mod_bayes_cache()
+    try:
+      mod_bayes_cache()
   #  st.header("Rapport Naive Bayes")
-    
+    except:
+       ""
+
   with tab2:
-    mod_gb_cache()
-  #  st.image("médias/Capture_gb.png", caption = '',use_column_width=True)
+    try:
+      mod_gb_cache()
+    except:
+      st.image("médias/Capture_gb.png", caption = '',use_column_width=True)
   #  #  st.header("Rapport Gardient boosting")
   
   with tab3:
-    mod_svm_cache()
-    # st.image("médias/Capture_svm.png", caption = '',use_column_width=True)
+    try:
+      mod_svm_cache()
+    except:
+      st.image("médias/Capture_svm.png", caption = '',use_column_width=True)
   #  #  st.header("Rapport SVM")
   
   with tab4:
-    mod_knn_cache()
-
-  #  st.image("médias/Capture_knn.png", caption = '',use_column_width=True)
+    try:
+      mod_knn_cache()
+    except:
+      st.image("médias/Capture_knn.png", caption = '',use_column_width=True)
   #  #  st.header("Rapport KNN")
   
                                           ## fin modélisation ##
   
   with tab5:
+      
       st.write("Comparaison des modèles:")
       st.image("médias/comparaison_algo.png", caption = '',use_column_width=True)
 
@@ -1162,6 +1168,7 @@ if page == pages[3] :
   #       st.write("modele rf:",commentaire_pred_rf(POStagging(comm)))
   #       st.write("modele knn:",commentaire_pred_knn(POStagging(comm)))
 
+ #region Clusterning
 ############################################# Le clustering ######################################
    
 if page == pages[4] :
@@ -1300,53 +1307,95 @@ if page == pages[4] :
 
    
   
-  tab1, tab2, tab3 = st.tabs(["Cluster 1", "Cluster 2", "Cluster 3"])
+  tab1, tab2, tab3, tab4, tab5 = st.tabs(["Cluster 1", "Cluster 2", "Cluster 3","Cluster 4","Cluster 5",])
 
   with tab1:
-    st.header("Cluster 01")
-    df3_1 = df3[df3['cluster'] == 1]
-    # Exemple pour le cluster 0
-    text_cluster_1 = ' '.join(df3_1['commentaire_clean'])
-    # Générer le nuage de mots
-    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text_cluster_1)
-    # Afficher le nuage de mots
-    fig , ax = plt.subplots(figsize=(10,6))
-    plt.imshow(wordcloud, interpolation='bilinear')
-    plt.axis('off')
-    plt.title('Nuage de mots pour le cluster 1')
-    st.pyplot(fig)
+    try:
+      st.header("Cluster 01")
+      df3_1 = df3[df3['cluster'] == 1]
+      # Exemple pour le cluster 0
+      text_cluster_1 = ' '.join(df3_1['commentaire_clean'])
+      # Générer le nuage de mots
+      wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text_cluster_1)
+      # Afficher le nuage de mots
+      fig , ax = plt.subplots(figsize=(10,6))
+      plt.imshow(wordcloud, interpolation='bilinear')
+      plt.axis('off')
+      plt.title('Nuage de mots pour le cluster 1')
+      st.pyplot(fig)
 
-    # st.image("https://static.streamlit.io/examples/cat.jpg", width=200)
-
+      # st.image("https://static.streamlit.io/examples/cat.jpg", width=200)
+    except:
+      st.write("Pas de résultats, car moins de clusters")
+  
   with tab2:
-    st.header("Cluster 02")
-    df3_2 = df3[df3['cluster'] == 2]
-    # Exemple pour le cluster 0
-    text_cluster_2 = ' '.join(df3_2['commentaire_clean'])
-    # Générer le nuage de mots
-    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text_cluster_2)
-    # Afficher le nuage de mots
-    fig , ax = plt.subplots(figsize=(10,6))
-    plt.imshow(wordcloud, interpolation='bilinear')
-    plt.axis('off')
-    plt.title('Nuage de mots pour le cluster 2')
-    st.pyplot(fig)
+    try:
+      st.header("Cluster 02")
+      df3_2 = df3[df3['cluster'] == 2]
+      # Exemple pour le cluster 0
+      text_cluster_2 = ' '.join(df3_2['commentaire_clean'])
+      # Générer le nuage de mots
+      wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text_cluster_2)
+      # Afficher le nuage de mots
+      fig , ax = plt.subplots(figsize=(10,6))
+      plt.imshow(wordcloud, interpolation='bilinear')
+      plt.axis('off')
+      plt.title('Nuage de mots pour le cluster 2')
+      st.pyplot(fig)
+    except:
+      st.write("Pas de résultats, car moins de clusters")
 
   with tab3:
-    st.header("Cluster 03")
-    df3_3 = df3[df3['cluster'] == 3]
-    # Exemple pour le cluster 0
-    text_cluster_3 = ' '.join(df3_3['commentaire_clean'])
-    # Générer le nuage de mots
-    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text_cluster_3)
-    # Afficher le nuage de mots
-    fig , ax = plt.subplots(figsize=(10,6))
-    plt.imshow(wordcloud, interpolation='bilinear')
-    plt.axis('off')
-    plt.title('Nuage de mots pour le cluster 3')
-    st.pyplot(fig)
+    try:
+      st.header("Cluster 03")
+      df3_3 = df3[df3['cluster'] == 3]
+      # Exemple pour le cluster 0
+      text_cluster_3 = ' '.join(df3_3['commentaire_clean'])
+      # Générer le nuage de mots
+      wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text_cluster_3)
+      # Afficher le nuage de mots
+      fig , ax = plt.subplots(figsize=(10,6))
+      plt.imshow(wordcloud, interpolation='bilinear')
+      plt.axis('off')
+      plt.title('Nuage de mots pour le cluster 3')
+      st.pyplot(fig)
+    except:
+      st.write("Pas de résultats, car moins de clusters") 
 
+  with tab4:
+    try:
+      st.header("Cluster 04")
+      df3_4 = df3[df3['cluster'] == 4]
+      # Exemple pour le cluster 0
+      text_cluster_4 = ' '.join(df3_4['commentaire_clean'])
+      # Générer le nuage de mots
+      wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text_cluster_4)
+      # Afficher le nuage de mots
+      fig , ax = plt.subplots(figsize=(10,6))
+      plt.imshow(wordcloud, interpolation='bilinear')
+      plt.axis('off')
+      plt.title('Nuage de mots pour le cluster 4')
+      st.pyplot(fig)
+    except:
+      st.write("Pas de résultats, car moins de clusters") 
 
+  with tab5:
+    try:
+      st.header("Cluster 05")
+      df3_5 = df3[df3['cluster'] == 5]
+      # Exemple pour le cluster 0
+      text_cluster_5 = ' '.join(df3_5['commentaire_clean'])
+      # Générer le nuage de mots
+      wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text_cluster_5)
+      # Afficher le nuage de mots
+      fig , ax = plt.subplots(figsize=(10,6))
+      plt.imshow(wordcloud, interpolation='bilinear')
+      plt.axis('off')
+      plt.title('Nuage de mots pour le cluster 5')
+      st.pyplot(fig)
+
+    except:
+      st.write("Pas de résultats, car moins de clusters")   
 
   # st.dataframe(df3.head(10))
   
@@ -1396,7 +1445,7 @@ with st.expander('About this app'):
 # image avis clients
 st.sidebar.image("médias/avis_clients.png",  caption='',  use_column_width=False, width=50 )
 
-
+#endregion
 
 
 ####################    divers   ##########""
