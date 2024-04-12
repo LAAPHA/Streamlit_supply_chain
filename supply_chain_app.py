@@ -26,7 +26,6 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.cluster import KMeans
-from sklearn.ensemble import _gb_losses
 
 import joblib
 from time import sleep
